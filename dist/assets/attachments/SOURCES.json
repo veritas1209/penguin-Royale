@@ -1,0 +1,200 @@
+{
+  "checkedAt": "2026-09-15",
+  "baseIdMapping": true,
+  "entries": [
+    {
+      "id": "red-dot",
+      "file": "red-dot.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Upper_DotSight_01_C.png",
+      "verification": "Downloaded image visually inspected; silhouette matches attachment identity; transparent PNG.",
+      "bytes": 211294,
+      "sha256": "5a8788af11a0197c0a507fdaaaffe59ab89b2edbbc8d26c33d673cbe898880c3",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 357419,
+        "optimizedBytes": 211294,
+        "nativeResolutionPreserved": true
+      }
+    },
+    {
+      "id": "scope-4x",
+      "file": "scope-4x.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Upper_ACOG_01_C.png",
+      "verification": "Downloaded image visually inspected; silhouette matches attachment identity; transparent PNG.",
+      "bytes": 194608,
+      "sha256": "5ba2ef2d393f171970a65832d5ea0618c82826a3d2d0b97d858923b3728706f8",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 320286,
+        "optimizedBytes": 194608,
+        "nativeResolutionPreserved": true
+      }
+    },
+    {
+      "id": "suppressor",
+      "file": "suppressor.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Muzzle_Suppressor_Large_C.png",
+      "verification": "Downloaded image visually inspected; silhouette matches attachment identity; transparent PNG.",
+      "bytes": 80128,
+      "sha256": "915c5cc03f262f364224fc7c0d817c4f02f31a2afd25390a86d0ed36cd181c75",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 140169,
+        "optimizedBytes": 80128,
+        "nativeResolutionPreserved": true
+      }
+    },
+    {
+      "id": "vertical-grip",
+      "file": "vertical-grip.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Lower_Foregrip_C.png",
+      "verification": "Downloaded image visually inspected; silhouette matches attachment identity; transparent PNG.",
+      "bytes": 212982,
+      "sha256": "f818934b87c822a1da01f772a02712d75c3421b77660c49774595319806392ee",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 396247,
+        "optimizedBytes": 212982,
+        "nativeResolutionPreserved": true
+      }
+    },
+    {
+      "id": "steel-plate",
+      "file": "steel-plate.webp",
+      "renderer": "official-raster",
+      "source": "https://www.pubgmobile.com/images/event/pubgmxmetro/attachments_1.png",
+      "verification": "Guide adjacent English label and downloaded image visually inspected together; Metro tile background retained.",
+      "bytes": 7872,
+      "sha256": "b658da4996c104db3c9ef29d524aaeeb84b81b9cc81c19982882bba1430ce003",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 8515,
+        "optimizedBytes": 7872,
+        "nativeResolutionPreserved": true
+      }
+    },
+    {
+      "id": "tactical-pouch",
+      "file": "tactical-pouch.webp",
+      "renderer": "official-raster",
+      "source": "https://www.pubgmobile.com/images/event/pubgmxmetro/attachments_5.png",
+      "verification": "Guide adjacent English label and downloaded image visually inspected together; Metro tile background retained.",
+      "bytes": 7766,
+      "sha256": "61e16047c50a855c2d8851c51e107aedd2ba4cd0a104bf8369fcbe3f2c85f10d",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 8502,
+        "optimizedBytes": 7766,
+        "nativeResolutionPreserved": true
+      }
+    },
+    {
+      "id": "underbarrel-launcher",
+      "file": null,
+      "renderer": "code-native-svg",
+      "source": null,
+      "verification": "Original code artwork; not a claimed official texture."
+    },
+    {
+      "id": "exoskeleton",
+      "file": null,
+      "renderer": "code-native-svg",
+      "source": null,
+      "verification": "Original code artwork; not a claimed official texture."
+    },
+    {
+      "id": "lead-lined-fabric",
+      "file": null,
+      "renderer": "code-native-svg",
+      "source": null,
+      "verification": "Original code artwork; not a claimed official texture."
+    },
+    {
+      "id": "scope-2x",
+      "file": "scope-2x.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Upper_Aimpoint_C.png",
+      "verification": "Original transparent asset visually inspected on dark background in optic-asset-inspection.jpg; no source image modification.",
+      "bytes": 171866,
+      "sha256": "b68a1b98240ad38f6adf4be21fd4e2a2058e172740b73ea7303263957a1e75d3",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 244943,
+        "optimizedBytes": 171866,
+        "nativeResolutionPreserved": true
+      }
+    },
+    {
+      "id": "scope-3x",
+      "file": "scope-3x.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Upper_Scope3x_C.png",
+      "verification": "Original transparent asset visually inspected on dark background in optic-asset-inspection.jpg; no source image modification.",
+      "bytes": 169596,
+      "sha256": "1a9ff0b28c5d6e60d2b4ba8df87979e8053985f9e9290ed4a2a27b412ea7d7cc",
+      "originalSha256": "0fdf98305ba738167a805aea60b59ff81045213bb4a3fa2fbe2c8739fc6e3139",
+      "originalBytes": 5133135,
+      "processing": "UI image sizing to 512px followed by lossless WebP encoding. Original PNG retained in reference-assets/attachments. Alpha preserved; encoded visible pixels match scaled reference."
+    },
+    {
+      "id": "scope-6x",
+      "file": "scope-6x.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Upper_Scope6x_C.png",
+      "verification": "Original transparent asset visually inspected on dark background in optic-asset-inspection.jpg; no source image modification.",
+      "bytes": 110730,
+      "sha256": "eb4203ec1f9615447ed541a685f34e01297d03b6710bbae3a0ba69dfeb6b498c",
+      "originalSha256": "86994aff3e5c680b020ba13f9029f9426eae1eb9825fc3485077eed0c97947e2",
+      "originalBytes": 4298311,
+      "processing": "UI image sizing to 512px followed by lossless WebP encoding. Original PNG retained in reference-assets/attachments. Alpha preserved; encoded visible pixels match scaled reference."
+    },
+    {
+      "id": "scope-8x",
+      "file": "scope-8x.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Upper_CQBSS_C.png",
+      "verification": "Original transparent asset visually inspected on dark background in optic-asset-inspection.jpg; no source image modification.",
+      "bytes": 209740,
+      "sha256": "90fbbd3bfa27348959fb4d8098e87037d1bb5116dc767007e79bcb40af39d52a",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 374917,
+        "optimizedBytes": 209740,
+        "nativeResolutionPreserved": true
+      }
+    },
+    {
+      "id": "extended-mag",
+      "file": "extended-quickdraw-mag.webp",
+      "renderer": "official-raster",
+      "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Attachment/Item_Attach_Weapon_Magazine_ExtendedQuickDraw_Large_C.png",
+      "verification": "Original transparent asset visually inspected on dark background in optic-asset-inspection.jpg; no source image modification.",
+      "bytes": 225994,
+      "sha256": "a7f6d0056cce7a39f8785abd3b75f58583353ee4d25522381dc1d85bdf3d4e79",
+      "compression": {
+        "method": "pixel-exact lossless WebP",
+        "originalBytes": 372640,
+        "optimizedBytes": 225994,
+        "nativeResolutionPreserved": true
+      }
+    }
+  ],
+  "rejected": [
+    {
+      "source": "https://www.pubgmobile.com/images/event/pubgmxmetro/grip_1.png",
+      "reason": "Actual image is ammunition crate; must never render as M203."
+    },
+    {
+      "source": "https://www.pubgmobile.com/images/event/pubgmxmetro/attachments_3.png",
+      "reason": "Guide labels powered exoskeleton, but case-like silhouette is insufficient for the requested visual identity."
+    },
+    {
+      "source": "https://www.pubgmobile.com/images/event/pubgmxmetro/attachments_6.png",
+      "reason": "Guide labels lead-lined fabric, but case-like silhouette is insufficient for the requested textile visual identity."
+    }
+  ]
+}

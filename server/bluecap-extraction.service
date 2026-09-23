@@ -1,0 +1,33 @@
+[Unit]
+Description=BLUECAP cooperative extraction game
+After=network.target
+
+[Service]
+Type=simple
+User=hajin
+Group=hajin
+WorkingDirectory=/home/hajin/services/bluecap-extraction/current
+Environment=NODE_ENV=production
+Environment=PENGUIN_HOST=127.0.0.1
+Environment=PENGUIN_PORT=18090
+Environment=PENGUIN_DB_PATH=/home/hajin/.local/share/bluecap-extraction/game.sqlite
+Environment=PENGUIN_STATIC_DIR=/home/hajin/services/bluecap-extraction/current/dist
+Environment=PENGUIN_ALLOWED_ORIGINS=https://hajin-desktop.tailfb939b.ts.net:10000
+Environment=PENGUIN_TRUST_PROXY=1
+ExecStart=/home/hajin/services/pulse-arcade/node/bin/node server/index.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=25
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/hajin/.local/share/bluecap-extraction
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryMax=512M
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target

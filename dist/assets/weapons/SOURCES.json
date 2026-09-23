@@ -1,0 +1,734 @@
+{
+  "akm": {
+    "file": "akm.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      197,
+      247,
+      1450,
+      845
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-akm.webp"
+  },
+  "groza": {
+    "file": "groza.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      345,
+      227,
+      1299,
+      848
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-groza.webp"
+  },
+  "beryl-m762": {
+    "file": "beryl-m762.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      238,
+      254,
+      1405,
+      885
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-beryl_m762.webp"
+  },
+  "mk47-mutant": {
+    "file": "mk47-mutant.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      211,
+      226,
+      1432,
+      880
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-mk47_mutant.webp"
+  },
+  "ace32": {
+    "file": "ace32.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      202,
+      258,
+      1439,
+      850
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-ace32.webp"
+  },
+  "m416": {
+    "file": "m416.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      188,
+      281,
+      1454,
+      868
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-m416.webp"
+  },
+  "m16a4": {
+    "file": "m16a4.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      183,
+      270,
+      1459,
+      856
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-m16a4.webp"
+  },
+  "scar-l": {
+    "file": "scar-l.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      212,
+      247,
+      1430,
+      886
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-scar-l.webp"
+  },
+  "aug": {
+    "file": "aug.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      336,
+      258,
+      1350,
+      855
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-aug_a3.webp"
+  },
+  "qbz": {
+    "file": "qbz.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      263,
+      257,
+      1381,
+      892
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-qbz95.webp"
+  },
+  "g36c": {
+    "file": "g36c.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      276,
+      262,
+      1402,
+      891
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-g36c.webp"
+  },
+  "famas": {
+    "file": "famas.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      272,
+      229,
+      1372,
+      861
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-famas_g2.webp"
+  },
+  "mini-14": {
+    "file": "mini-14.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      182,
+      263,
+      1461,
+      892
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-mini14.webp"
+  },
+  "mk12": {
+    "file": "mk12.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      185,
+      241,
+      1459,
+      860
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-mk12.webp"
+  },
+  "qbu": {
+    "file": "qbu.webp",
+    "width": 240,
+    "height": 240,
+    "bounds": [
+      12,
+      23,
+      230,
+      222
+    ],
+    "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Weapon/Main/Item_Weapon_QBU88_C.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 23137,
+      "optimizedBytes": 12632,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "sks": {
+    "file": "sks.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      203,
+      260,
+      1440,
+      887
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-sks.webp"
+  },
+  "slr": {
+    "file": "slr.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      171,
+      290,
+      1472,
+      863
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-slr.webp"
+  },
+  "vss": {
+    "file": "vss.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      236,
+      273,
+      1406,
+      880
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-vss.webp"
+  },
+  "kar98k": {
+    "file": "kar98k.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      191,
+      245,
+      1453,
+      875
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-kar98k.webp"
+  },
+  "m24": {
+    "file": "m24.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      183,
+      271,
+      1459,
+      875
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-m24.webp"
+  },
+  "awm": {
+    "file": "awm.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      194,
+      273,
+      1453,
+      864
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-awm.webp"
+  },
+  "win94": {
+    "file": "win94.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      208,
+      259,
+      1428,
+      914
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-win94.webp"
+  },
+  "lynx-amr": {
+    "file": "lynx-amr.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      178,
+      280,
+      1465,
+      870
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-lynx_amr.webp"
+  },
+  "micro-uzi": {
+    "file": "micro-uzi.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      453,
+      249,
+      1189,
+      899
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-micro_uzi.webp"
+  },
+  "ump": {
+    "file": "ump.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      284,
+      243,
+      1359,
+      869
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-ump45.webp"
+  },
+  "tommy-gun": {
+    "file": "tommy-gun.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      248,
+      257,
+      1398,
+      902
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-tommy_gun.webp"
+  },
+  "vector": {
+    "file": "vector.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      296,
+      233,
+      1348,
+      920
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-vector.webp"
+  },
+  "mp5k": {
+    "file": "mp5k.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      445,
+      226,
+      1196,
+      886
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-mp5k.webp"
+  },
+  "js9": {
+    "file": "js9.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      356,
+      238,
+      1279,
+      895
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-js9.webp"
+  },
+  "pp19-bizon": {
+    "file": "pp19-bizon.webp",
+    "width": 240,
+    "height": 240,
+    "bounds": [
+      6,
+      11,
+      236,
+      238
+    ],
+    "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Weapon/Main/Item_Weapon_BizonPP19_C.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 34484,
+      "optimizedBytes": 18622,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "p90": {
+    "file": "p90.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      276,
+      252,
+      1364,
+      889
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-p90.webp"
+  },
+  "s1897": {
+    "file": "s1897.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      203,
+      267,
+      1440,
+      919
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-s1897.webp"
+  },
+  "s686": {
+    "file": "s686.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      200,
+      267,
+      1445,
+      882
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-s686.webp"
+  },
+  "s12k": {
+    "file": "s12k.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      199,
+      283,
+      1443,
+      864
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-s12k.webp"
+  },
+  "dbs": {
+    "file": "dbs.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      253,
+      231,
+      1388,
+      862
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-dbs.webp"
+  },
+  "m249": {
+    "file": "m249.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      224,
+      277,
+      1417,
+      863
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-m249.webp"
+  },
+  "mg3": {
+    "file": "mg3.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      190,
+      291,
+      1478,
+      826
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-mg3.webp"
+  },
+  "dp28": {
+    "file": "dp28.webp",
+    "width": 240,
+    "height": 240,
+    "bounds": [
+      6,
+      9,
+      239,
+      238
+    ],
+    "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Weapon/Main/Item_Weapon_DP28_C.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 11387,
+      "optimizedBytes": 9838,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "crossbow": {
+    "file": "crossbow.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      224,
+      236,
+      1418,
+      926
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-crossbow.webp"
+  },
+  "p92": {
+    "file": "p92.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      486,
+      269,
+      1156,
+      895
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-p92.webp"
+  },
+  "p18c": {
+    "file": "p18c.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      511,
+      272,
+      1133,
+      895
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-p18c.webp"
+  },
+  "skorpion": {
+    "file": "skorpion.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      491,
+      275,
+      1150,
+      896
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-skorpion.webp"
+  },
+  "deagle": {
+    "file": "deagle.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      473,
+      285,
+      1165,
+      886
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-deagle.webp"
+  },
+  "p1911": {
+    "file": "p1911.webp",
+    "width": 240,
+    "height": 240,
+    "bounds": [
+      30,
+      20,
+      210,
+      225
+    ],
+    "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Weapon/Handgun/Item_Weapon_M1911_C.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 35943,
+      "optimizedBytes": 20300,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "r45": {
+    "file": "r45.webp",
+    "width": 240,
+    "height": 240,
+    "bounds": [
+      19,
+      19,
+      225,
+      228
+    ],
+    "source": "https://raw.githubusercontent.com/pubg/api-assets/master/Assets/Item/Weapon/Handgun/Item_Weapon_Rhino_C.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 34440,
+      "optimizedBytes": 23138,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "r1895": {
+    "file": "r1895.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      466,
+      274,
+      1180,
+      910
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-r1895.webp"
+  },
+  "sawed-off": {
+    "file": "sawed-off.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      298,
+      281,
+      1341,
+      888
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-sawed_off.webp"
+  },
+  "mk14": {
+    "file": "mk14.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      199,
+      258,
+      1446,
+      886
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-mk14.webp"
+  },
+  "honey-badger": {
+    "file": "honey-badger.webp",
+    "width": 1177,
+    "height": 423,
+    "bounds": [
+      87,
+      0,
+      1015,
+      403
+    ],
+    "source": "https://www.pubgmobile.com/images/event/PUBGMOBILE-WIKI9/weapons/honeybadger.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 272416,
+      "optimizedBytes": 182902,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "ns2000": {
+    "file": "ns2000.webp",
+    "width": 1177,
+    "height": 423,
+    "bounds": [
+      109,
+      0,
+      1069,
+      423
+    ],
+    "source": "https://www.pubgmobile.com/images/event/PUBGMOBILE-WIKI9/weapons/ns2000.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 322541,
+      "optimizedBytes": 213666,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "dual-mp7": {
+    "file": "dual-mp7.webp",
+    "width": 1177,
+    "height": 423,
+    "bounds": [
+      315,
+      2,
+      858,
+      423
+    ],
+    "source": "https://www.pubgmobile.com/images/event/PUBGMOBILE-WIKI9/weapons/MP7.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 302301,
+      "optimizedBytes": 182398,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "signal-flare": {
+    "file": "signal-flare.webp",
+    "width": 1177,
+    "height": 423,
+    "bounds": [
+      364,
+      10,
+      826,
+      401
+    ],
+    "source": "https://www.pubgmobile.com/images/event/PUBGMOBILE-WIKI9/weapons/flaregun.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 145383,
+      "optimizedBytes": 97284,
+      "nativeResolutionPreserved": true
+    }
+  },
+  "sickle": {
+    "file": "sickle.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      355,
+      302,
+      1304,
+      783
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-sickle.webp"
+  },
+  "machete": {
+    "file": "machete.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      236,
+      270,
+      1410,
+      785
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-machete.webp"
+  },
+  "frying-pan": {
+    "file": "frying-pan.webp",
+    "width": 1600,
+    "height": 1096,
+    "bounds": [
+      390,
+      234,
+      1251,
+      880
+    ],
+    "source": "https://wstatic-prod.pubg.com/web/live/static/game-info/weapons/images/viewer/img-weapons-pan.webp"
+  },
+  "asm-abakan": {
+    "file": "asm-abakan.webp",
+    "width": 660,
+    "height": 540,
+    "bounds": [
+      68,
+      66,
+      593,
+      475
+    ],
+    "source": "https://www.pubgmobile.com/images/event/missionignition/s4_slide2.png",
+    "compression": {
+      "method": "pixel-exact lossless WebP",
+      "originalBytes": 244422,
+      "optimizedBytes": 159046,
+      "nativeResolutionPreserved": true
+    }
+  }
+}

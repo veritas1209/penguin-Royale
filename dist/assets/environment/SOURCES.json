@@ -1,0 +1,68 @@
+[
+  {
+    "file": "Asphalt010_1K-JPG_Color.webp",
+    "source": "https://ambientcg.com/view?id=Asphalt010",
+    "license": "CC0-1.0",
+    "sha256": "1ff6420c77babb9b6dc4566e8cb63a8bb6098fb6b298c6f73ba9fab6956db0cc",
+    "compression": {
+      "method": "high-quality WebP / native resolution",
+      "originalBytes": 1093417,
+      "optimizedBytes": 363688,
+      "nativeResolutionPreserved": true
+    }
+  },
+  {
+    "file": "Asphalt010_1K-JPG_NormalGL.webp",
+    "source": "https://ambientcg.com/view?id=Asphalt010",
+    "license": "CC0-1.0",
+    "sha256": "453795738ddb492baac0ccaf2639f9a83032e136cb774e3d97b4923a2827d672",
+    "compression": {
+      "method": "pixel-exact lossless WebP / native resolution",
+      "originalBytes": 2105657,
+      "optimizedBytes": 2096376,
+      "nativeResolutionPreserved": true
+    }
+  },
+  {
+    "file": "Asphalt010_1K-JPG_Roughness.webp",
+    "source": "https://ambientcg.com/view?id=Asphalt010",
+    "license": "CC0-1.0",
+    "sha256": "fb414d47ddcc80af78e103e217d149994f8593124af8b4875ff6761eb4e23834",
+    "compression": {
+      "method": "pixel-exact lossless WebP / native resolution",
+      "originalBytes": 746915,
+      "optimizedBytes": 701636,
+      "nativeResolutionPreserved": true
+    }
+  },
+  {
+    "file": "Snow001_1K-JPG_Color.webp",
+    "source": "https://ambientcg.com/view?id=Snow001",
+    "license": "CC0-1.0",
+    "sha256": "00a7d66af8ad0ad4cdd27acb9439c1016395e51ef99464675a49db3b0655bf8a",
+    "compression": {
+      "method": "high-quality WebP / native resolution",
+      "originalBytes": 682630,
+      "optimizedBytes": 50390,
+      "nativeResolutionPreserved": true
+    }
+  },
+  {
+    "file": "Snow001_1K-JPG_NormalGL.jpg",
+    "source": "https://ambientcg.com/view?id=Snow001",
+    "license": "CC0-1.0",
+    "sha256": "e32616dc4eb25a5f28324c99f2c395e6150cd4a795e9ed48dfb3380b265eb941"
+  },
+  {
+    "file": "Snow001_1K-JPG_Roughness.webp",
+    "source": "https://ambientcg.com/view?id=Snow001",
+    "license": "CC0-1.0",
+    "sha256": "230522c4e8085f3ee3b92267d2ba76d86dc06b49e00e29d1b32dba1c1ecca309",
+    "compression": {
+      "method": "pixel-exact lossless WebP / native resolution",
+      "originalBytes": 705281,
+      "optimizedBytes": 681452,
+      "nativeResolutionPreserved": true
+    }
+  }
+]
