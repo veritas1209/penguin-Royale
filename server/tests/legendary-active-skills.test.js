@@ -37,6 +37,17 @@ test('Issen lands clear when the full-range endpoint overlaps a wall',()=>{
  assert.equal(f.player.arayaDash,null);
 });
 
+test('Issen stops before the riverside fence instead of crossing into water',()=>{
+ const f=fixture('legend-araya',[{id:'river-fence-122-w-test',kind:'wood-fence',x:0,z:5,w:8,d:.5}]);
+ f.raid.world.terrain=[{kind:'river',x:0,z:8,w:8,d:6}];
+ f.raid.activeSkill(f.player,0,1,f.now);
+ assert.ok(f.player.arayaDash.travel>3);
+ assert.ok(f.player.arayaDash.travel<4.4);
+ f.now=1500;f.raid.updateArayaDash(f.player,f.now);
+ assert.ok(f.player.z<4.4);
+ assert.equal(f.player.arayaDash,null);
+});
+
 test('Issen hits every path target, burns, and strikes/stuns the last one',()=>{
  const f=fixture('legend-araya',[{x:0,z:7,w:8,d:1}]);
  const first=f.enemy('one',0,4),last=f.enemy('two',0,9);last.stunnedUntil=0;

@@ -1,8 +1,19 @@
 export type MoveInput={moveX:number;moveZ:number;sprint:boolean};
 export type MoveState={x:number;z:number;stamina:number;maxStamina:number;moveMultiplier:number;coldUntil:number;staminaRecoveryAt?:number};
-export type MoveWorld={size:number;obstacles:readonly {x:number;z:number;w?:number;d?:number;width?:number;depth?:number}[]};
+export type MoveWorld={size:number;
+ obstacles:readonly {id?:string;x:number;z:number;w?:number;d?:number;width?:number;depth?:number}[];
+ terrain?:readonly {kind:string;x:number;z:number;w:number;d:number}[];
+ roads?:readonly {x:number;z:number;w:number;d:number}[]};
 const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));
-export function movementBlocked(world:MoveWorld,x:number,z:number){return world.obstacles.some(o=>Math.abs(x-o.x)<=(o.w??o.width??1)/2+.45&&Math.abs(z-o.z)<=(o.d??o.depth??1)/2+.45);}
+export function riverBlocked(world:MoveWorld,x:number,z:number){
+ const inWater=world.terrain?.some(t=>t.kind==='river'&&Math.abs(x-t.x)<=t.w/2+.45&&Math.abs(z-t.z)<=t.d/2+.45);
+ if(!inWater)return false;
+ // Crossing roads are elevated bridge decks; all other river coordinates are impassable.
+ return !(world.roads??[]).some(r=>r.w>r.d&&Math.abs(x-r.x)<r.w/2-.45&&Math.abs(z-r.z)<r.d/2-.45);
+}
+export function movementBlocked(world:MoveWorld,x:number,z:number){
+ return riverBlocked(world,x,z)||world.obstacles.some(o=>Math.abs(x-o.x)<=(o.w??o.width??1)/2+.45&&Math.abs(z-o.z)<=(o.d??o.depth??1)/2+.45);
+}
 export function normalizeMove(input:MoveInput):MoveInput{
  const x=clamp(input.moveX,-1,1),z=clamp(input.moveZ,-1,1),length=Math.hypot(x,z),m=Math.min(1,Math.hypot(input.moveX,input.moveZ));
  return {moveX:length?x/length*m:0,moveZ:length?z/length*m:0,sprint:input.sprint===true};

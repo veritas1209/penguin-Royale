@@ -19,7 +19,7 @@ import {dropInventory,directEquipmentPlan} from './inventoryActions.js';
 import {talentBonus} from '../shared/talents.ts';
 import {armorSlotCount,armorAttachmentsFromEquipment,armorAttachmentEffects} from '../shared/armorAttachments.ts';
 import {createPlayerLoot} from './playerLoot.js';
-import {advanceMovement, movementBlocked} from '../shared/movement.ts';
+import {advanceMovement, movementBlocked, riverBlocked} from '../shared/movement.ts';
 import {inventoryCapacity,equipmentWeights} from '../shared/metroInventory.ts';
 import {goldEquipmentEffects,equipmentWeightMobilityBonus,secureCapacityForGear,legacyGoldEquipmentAliases} from '../shared/goldEquipment.ts';
 import {weaponAttachmentId,weaponAttachmentsFromEquipment} from '../shared/weaponAttachments.ts';
@@ -634,9 +634,13 @@ player.input={
     const direction=normalize(aimX,aimZ);
     if(weapon.id==='legend-araya'){
       let travel=16;
-      for(let step=.2;step<=16.001;step+=.2){
+      const riverFences=this.world.obstacles.filter(o=>o.id?.startsWith('river-fence-'));
+      for(let step=.1;step<=16.001;step+=.1){
         const x=player.x+direction.x*step,z=player.z+direction.z*step;
-        if(Math.abs(x)>this.world.size/2-.5||Math.abs(z)>this.world.size/2-.5){travel=step-.2;break;}
+        const fenceHit=riverFences.some(o=>Math.abs(x-o.x)<=(o.w??1)/2+.45&&Math.abs(z-o.z)<=(o.d??1)/2+.45);
+        if(Math.abs(x)>this.world.size/2-.5||Math.abs(z)>this.world.size/2-.5||fenceHit||riverBlocked(this.world,x,z)){
+          travel=step-.1;break;
+        }
       }
       if(travel<.2)return;
       const targets=[...this.enemies.values()].filter(enemy=>{

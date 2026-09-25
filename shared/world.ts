@@ -4705,7 +4705,7 @@ function __bcNatureWorld122(e){
  }
  const waters=e.terrain.filter(t=>t.kind==='river'||t.kind==='reservoir');
  const overlap=(a,b,g=0)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+g&&Math.abs(a.z-b.z)<(a.d+b.d)/2+g;
- const roadAt=(x,z,margin=0)=>e.roads.some(r=>Math.abs(x-r.x)<r.w/2+margin&&Math.abs(z-r.z)<r.d/2+margin);
+ const roadAt=(x,z,margin=0)=>e.roads.some(r=>r.w>r.d&&Math.abs(x-r.x)<r.w/2+margin&&Math.abs(z-r.z)<r.d/2+margin);
  e.obstacles=e.obstacles.filter(o=>!o.id.startsWith('river-fence-'));
  const movable=e.obstacles.filter(o=>!['tree','rock','wood-fence','road-gate','blast-wall','interior-wall','interior-window'].includes(o.kind));
  for(const o of movable){

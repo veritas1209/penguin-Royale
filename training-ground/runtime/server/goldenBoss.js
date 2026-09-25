@@ -14,7 +14,7 @@ export const GOLDEN_STAR_RELOAD_MS=10000;
    Shockwave reaches 1.5x the core radius. */
 export const GOLDEN_STAR_CORE_RADIUS=5;
 export const GOLDEN_STAR_RADIUS=GOLDEN_STAR_CORE_RADIUS*1.5;
-export const GOLDEN_STAR_CORE_DAMAGE=60;
+export const GOLDEN_STAR_CORE_DAMAGE=120;
 export const GOLDEN_STAR_SPLASH_DAMAGE=25;
 
 function hash(value){let result=0;for(const char of String(value))result=(Math.imul(result,31)+char.charCodeAt(0))>>>0;return result;}
