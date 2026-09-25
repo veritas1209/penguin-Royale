@@ -8,6 +8,18 @@ function fixture(id,hp=10,maxHp=100){
  const p={id:'p',alive:true,inventory:[{itemId:id,quantity:2}],gear:{},hp,maxHp};
  return {raid,p,complete(){now=p.medicalUse.endsAt;raid.finishRadiationMedicine(p,now);return now;}};
 }
+test('medical sound event occurs when treatment starts, not when healing finishes',()=>{
+ const f=fixture('med-kit',20),events=[];
+ f.raid.event=(kind,data)=>events.push({kind,data});
+ f.raid.useMedical(f.p,'med-kit');
+ assert.deepEqual(events.map(e=>e.kind),['medical_started']);
+ assert.equal(events[0].data.itemId,'med-kit');
+ assert.equal(events[0].data.startedAt,f.p.medicalUse.startedAt);
+ f.complete();
+ assert.deepEqual(events.map(e=>e.kind),['medical_started','heal']);
+ f.raid.useMedical(f.p,'med-kit');
+ assert.equal(events.length,2);
+});
 test('first aid restores to 80 percent of the current maximum and cannot heal above its cap',()=>{
  const f=fixture('first-aid',10,120);f.raid.useMedical(f.p,'first-aid');assert.equal(f.p.medicalUse.endsAt-f.p.medicalUse.startedAt,6000);assert.equal(f.p.hp,10);
  f.complete();assert.equal(f.p.hp,96);assert.equal(f.p.inventory[0].quantity,1);f.raid.useMedical(f.p,'first-aid');assert.equal(f.p.medicalUse,null);

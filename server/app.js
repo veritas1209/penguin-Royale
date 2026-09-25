@@ -354,7 +354,7 @@ async function serveStatic(request, response, staticDir) {
     try { data = await readFile(filePath); } catch { return false; }
   }
   const extension = extname(filePath).toLowerCase();
-  const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.glb': 'model/gltf-binary', '.woff2': 'font/woff2' };
+  const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.glb': 'model/gltf-binary', '.woff2': 'font/woff2' };
   const contentType = types[extension] ?? 'application/octet-stream';
   response.writeHead(200, { 'content-type': contentType, 'content-length': data.length, 'cache-control': extension === '.html' ? 'no-cache' : 'public, max-age=31536000, immutable' });
   response.end(request.method === 'HEAD' ? undefined : data);

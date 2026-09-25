@@ -1,0 +1,18 @@
+# BLUECAP 로컬 전투 훈련장
+
+## 3D 훈련장 실행
+Windows에서 training-ground.cmd를 더블클릭하거나 training-ground.html을 브라우저로 여세요. 파일 자체에 게임의 Three.js 3D 렌더러, 펭귄 캐릭터와 무기·적 모델, 검 공격 궤적이 포함되어 있습니다. 인터넷, 로그인, HTTP 서버가 필요 없습니다.
+
+WASD 이동, Shift 전력질주, 마우스 조준 및 좌클릭 공격, 1~4 무기 선택, Space 공격, Q 액티브 스킬, R 표적 초기화. 오른쪽의 체크박스로 이동·반격하는 표적을 켤 수 있습니다. 아라야시키의 일섬(Q를 누르는 동안 최대 16m의 빨간 경로를 조준하고 Q를 놓으면 발동; 경로 적에게 30 피해·화상, 가장 먼 적 뒤로 연속 이동해 추가 30 피해·0.5초 공중 띄우기, 10초), 선더클랩의 천벌(가까운 적 최대 5명에게 각 200 피해, 15초), 카람빗의 초가속(5초간 공격속도 3배, 30초), 어비터의 빙결 폭풍(Q를 누르는 동안 전방 18m × 폭 8m의 빨간 직사각형을 조준하고 Q를 놓으면 발동, 범위 내 적에게 50 피해·이동과 공격 5초 정지, 30초)을 시험할 수 있습니다. 아라야시키 평타가 적에게 적중하면 매 적중마다 50% 확률로 일섬 재사용 시간이 1초 줄어듭니다. 일섬은 경로에 적이 없어도 최대 거리로 이동하고 엄폐물을 관통합니다. Q를 놓을 때만 발동하며 Esc 또는 우클릭으로 조준을 취소할 수 있습니다. 조준 중 거리 안내 툴팁은 표시되지 않습니다. Q 스킬 쿨타임은 무기별로 따로 유지되고 R로 초기화됩니다. 무적 DPS 표적은 훈련장 시작 지점 왼쪽에 있으며 이동·사망하지 않습니다. 최근 5초 DPS, 최고 DPS, 누적 피해를 왼쪽 위에서 확인할 수 있습니다.
+
+일섬에는 Video Project 10.m4a, 천벌에는 lightning.mp3, 카람빗에는 0386-마법&신비 (7).mp3, 어비터에는 Video Project 11.m4a의 사운드가 사용됩니다. 모두 단독 HTML에 내장되어 파일 하나로 재생됩니다.
+
+훈련장 3D 장면에 필요한 코드만 training-graphics-runtime.js에 보관합니다. 훈련장 브라우저 전투 컨트롤러는 기본 공격과 액티브 스킬의 로컬 시각 검증용입니다. 아라야시키 평타 쿨타임 감소와 어비터 광역 빙결은 실서버에도 반영되어 있습니다. 서버 판정을 정확히 검증할 때는 아래의 Raid 엔진 시뮬레이터를 사용하세요. training-controller.js와 training-shell.html을 검토한 뒤 python3 build-training.py로 단독 HTML을 다시 생성할 수 있습니다.
+
+## 정확한 Raid 엔진 시뮬레이터
+run.cmd를 더블클릭하려면 Node.js 22 이상이 필요합니다. 또는 node simulate.mjs scenario.json report.html을 실행하세요. 서버의 Raid 엔진 코드는 runtime/에 복사되어 있으며 외부 서버, 계정, 데이터베이스가 필요 없습니다. report.html과 report.json에 결과가 저장됩니다.
+
+scenario.json의 player.weaponId와 enemies, actions를 바꿔 재현 상황을 만들 수 있습니다. enemy.ai=true면 실제 적 AI가 동작하고, 기본값 false면 고정 표적입니다. 기본 공격은 Raid.command의 fire 명령으로 입력됩니다. 미리 만든 scenario-thunder.json, scenario-karambit.json, scenario-arbiter.json, scenario-ai.json도 사용할 수 있습니다. 서버 코드 스냅샷을 갱신할 때는 python3 sync-runtime.py <게임 소스 디렉터리>를 실행하세요. 이 작업은 로컬 파일만 바꿉니다.
+
+
+

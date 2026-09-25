@@ -1,0 +1,68 @@
+{
+  "name": "Legendary blade baseline - Arbiter",
+  "durationMs": 1500,
+  "stepMs": 50,
+  "size": 80,
+  "player": {
+    "x": 0,
+    "z": 0,
+    "hp": 100,
+    "weaponId": "legend-arbiter"
+  },
+  "enemies": [
+    {
+      "id": "front-1",
+      "name": "Front guard",
+      "kind": "raider",
+      "x": 0,
+      "z": 3,
+      "hp": 250,
+      "armor": 0
+    },
+    {
+      "id": "front-2",
+      "name": "Left guard",
+      "kind": "raider",
+      "x": -2,
+      "z": 3,
+      "hp": 250,
+      "armor": 0
+    },
+    {
+      "id": "front-3",
+      "name": "Right guard",
+      "kind": "raider",
+      "x": 2,
+      "z": 3,
+      "hp": 250,
+      "armor": 0
+    },
+    {
+      "id": "rear",
+      "name": "Rear control",
+      "kind": "raider",
+      "x": 0,
+      "z": -3,
+      "hp": 250,
+      "armor": 0
+    },
+    {
+      "id": "far",
+      "name": "Range control",
+      "kind": "raider",
+      "x": 9,
+      "z": 0,
+      "hp": 250,
+      "armor": 0
+    }
+  ],
+  "actions": [
+    {
+      "atMs": 0,
+      "type": "fire",
+      "weaponSlot": "melee",
+      "aimX": 0,
+      "aimZ": 1
+    }
+  ]
+}

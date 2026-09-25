@@ -9,7 +9,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import {installItemInstances} from './itemInstances.js';
 import {equipmentLossPlan,EQUIPMENT_LOSS_CHANCE} from './settlementLoss.js';
-import {WEAPON_ATTACHMENT_SLOTS,weaponAttachmentsFromEquipment,supportedWeaponSlots} from '../shared/weaponAttachments.ts';
+import {WEAPON_ATTACHMENT_SLOTS,weaponAttachmentsFromEquipment,supportsWeaponAttachment} from '../shared/weaponAttachments.ts';
 
 export class GameDatabase {
   constructor(path = 'penguin-extraction.sqlite', {lossRandom=Math.random,bagLossChance=1,upgradeRandom=Math.random} = {}) {
@@ -415,7 +415,7 @@ export class GameDatabase {
       if(fit&&itemId!==null){
         const weaponId=this.db.prepare('SELECT item_id AS itemId FROM equipped WHERE user_id=? AND slot=?').get(userId,fit[1])?.itemId;
         const weapon=catalog?.byId.get(target?.itemId??weaponId),part=catalog?.byId.get(itemId);
-        if(!weapon||!part||part.category!=='attachment'||part.slot!==fit[2]||!supportedWeaponSlots(weapon).includes(fit[2]))throw Object.assign(new Error('선택한 총기의 파츠 슬롯과 호환되지 않습니다.'),{code:'INCOMPATIBLE_SLOT'});
+        if(!weapon||!part||part.category!=='attachment'||part.slot!==fit[2]||!supportsWeaponAttachment(weapon,part))throw Object.assign(new Error('선택한 총기의 파츠 슬롯과 호환되지 않습니다.'),{code:'INCOMPATIBLE_SLOT'});
       }
       if(armorFit||fit){
         if(target&&((armorFit&&catalog.byId.get(target.itemId)?.category!=='armor')||(fit&&catalog.byId.get(target.itemId)?.category!=='weapon')))throw Object.assign(new Error('장비 종류가 맞지 않습니다.'),{code:'INCOMPATIBLE_SLOT'});

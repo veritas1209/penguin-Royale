@@ -16,7 +16,7 @@ export class Sound{
  private buffers=new Map<string,AudioBuffer>(); private pending=new Map<string,Promise<AudioBuffer|null>>();
  private gunSeen=new Map<string,number>(); private mg3Until=0;
  unlock(){if(!this.ctx){this.ctx=new AudioContext();this.master=this.ctx.createGain();this.master.gain.value=this.muted?0:this.volume;this.master.connect(this.ctx.destination);void this.prime();}void this.ctx.resume();}
- setMute(value:boolean){this.muted=value;if(this.master)this.master.gain.value=value?0:this.volume;}
+ setMute(value:boolean){this.muted=value;if(this.master)this.master.gain.value=value?0:this.volume;(window as any).__peAudio?.setMuted?.(value);(window as any).__bcMk14Mute112?.(value);}
  private async prime(){await Promise.all(FILES.map(f=>this.load(f)));}
  private async load(file:string):Promise<AudioBuffer|null>{
   const old=this.buffers.get(file);if(old)return old;const inflight=this.pending.get(file);if(inflight)return inflight;
@@ -42,7 +42,7 @@ export class Sound{
   if(!this.ctx||!this.master||this.muted)return;const key=options.eventKey;
   if(key){const t=performance.now(),last=this.gunSeen.get(key);if(last&&t-last<1200)return;this.gunSeen.set(key,t);if(this.gunSeen.size>160)for(const [k,v]of this.gunSeen)if(t-v>3000)this.gunSeen.delete(k);}
   const weapon=weaponBase(options.weaponId),family=String(options.weaponFamily??'').toUpperCase();
-  if(weapon==='mg3'){const t=performance.now();if(t<this.mg3Until)return;this.mg3Until=t+1800;this.playBuffer('auto2.mp3',{gain:1,pitch:1,distance:Math.max(0,options.distance??0),pan:options.pan??0,suppressed:false,raw:true});return;}
+  if(weapon==='mg3'){const t=performance.now();if(t<this.mg3Until)return;this.mg3Until=t+1800;this.playBuffer('auto2.mp3',{gain:1,pitch:1,distance:0,pan:options.pan??0,suppressed:false,raw:true});return;}
   let sample:SampleRef=SAMPLES[options.ammoId??'ammo-556']??SAMPLES['ammo-556'];
   if(weapon==='crossbow'||family==='CROSSBOW')sample={file:'shot1.mp3',gain:.86,pitch:1};
   else if(weapon==='lynx-amr')sample={file:'shotgun2.wav',gain:1.625,pitch:1};
@@ -54,7 +54,7 @@ export class Sound{
   else if(family==='DMR')sample={file:'shot5.wav',gain:1.22,pitch:1};
   else if(family==='PISTOL'||family==='HG')sample={file:'shot3.mp3',gain:.92,pitch:1};
   else if(family==='AR'||family==='SMG'||family==='LMG')sample={file:'auto1.mp3',gain:.88,pitch:1,burst:true};
-  this.playBuffer(sample.file,{gain:sample.gain,pitch:sample.pitch,distance:Math.max(0,options.distance??0),pan:options.pan??0,suppressed:weapon==='mg3'?false:!!options.suppressed,burst:sample.burst});
+  this.playBuffer(sample.file,{gain:sample.gain,pitch:sample.pitch,distance:0,pan:options.pan??0,suppressed:weapon==='mg3'?false:!!options.suppressed,burst:sample.burst});
  }
  play(cue:Cue){
   if(cue==='shot'){this.gunshot();return;}if(cue==='reload'){this.playBuffer('reload.mp3',{gain:.55,pitch:1,distance:0,pan:0,suppressed:false});return;}if(cue==='explosion'){this.playBuffer('explosion5.wav',{gain:1,pitch:1,distance:0,pan:0,suppressed:false});return;}

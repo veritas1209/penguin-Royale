@@ -1355,7 +1355,7 @@ export const WORLD:WorldDef = {
     },
     {
       "id": "ruins-building-1",
-      "x": 109,
+      "x": 137,
       "z": 53,
       "w": 10,
       "d": 10,
@@ -2745,8 +2745,8 @@ export const WORLD:WorldDef = {
     },
     {
       "id": "shelter-pine-134",
-      "x": 134,
-      "z": 58,
+      "x": 151,
+      "z": 53,
       "w": 2.1,
       "d": 2.1,
       "h": 5.830900700273186,
@@ -3058,8 +3058,8 @@ export const WORLD:WorldDef = {
     },
     {
       "id": "support-cache-4",
-      "x": 120,
-      "z": -5,
+      "x": 145,
+      "z": -8,
       "pool": "ammo",
       "tier": 3
     },
@@ -3541,7 +3541,7 @@ export const WORLD:WorldDef = {
     },
     {
       "id": "ruins-cache-1",
-      "x": 102,
+      "x": 130,
       "z": 53,
       "pool": "military",
       "tier": 3
@@ -3779,8 +3779,8 @@ export const WORLD:WorldDef = {
     },
     {
       "id": "route-cache-6",
-      "x": 105,
-      "z": -42,
+      "x": 124,
+      "z": -43,
       "pool": "supplies",
       "tier": 2
     },
@@ -4624,10 +4624,10 @@ export const WORLD:WorldDef = {
 function __bcMapUpdate107(e){
  const moves={
   "support-building-1":[160,-17],"support-building-3":[160,17],
-  "barracks-building-6":[-18,101],"barracks-building-7":[18,159],
-  "hydro-building-6":[128,-164],"market-building-0":[-166,-195],
-  "market-building-2":[-166,-163],"fishing-building-7":[-132,166],
-  "wheat-building-7":[153,166],"moon-building-2":[-72,-161],
+  "barracks-building-6":[-18,97],"barracks-building-7":[18,159],
+  "hydro-building-6":[132,-164],"market-building-0":[-166,-195],
+  "market-building-2":[-166,-163],"fishing-building-7":[-136,166],
+  "wheat-building-7":[149,166],"moon-building-2":[-72,-161],
   "ruins-building-2":[70,100],"ruins-building-3":[109,100]
  };
  for(const [id,[x,z]] of Object.entries(moves)){
@@ -4658,6 +4658,33 @@ function __bcMapUpdate107(e){
   fence("bridge-south-a",107.5,-7,30,1),fence("bridge-south-b",107.5,7,30,1)
  ];
  e.obstacles.push(...walls,...fences);
+ // A boom gate sits just inside each exposed road terminus. Intersections stay open.
+ const endGates=[];
+ const roads=e.roads;
+ for(const [index,road] of roads.entries()){
+  const vertical=road.d>road.w;
+  for(const direction of [-1,1]){
+   const tip=vertical
+    ?{x:road.x,z:road.z+direction*road.d/2}
+    :{x:road.x+direction*road.w/2,z:road.z};
+   const joined=roads.some((other,i)=>i!==index&&
+    Math.abs(tip.x-other.x)<=other.w/2+.35&&
+    Math.abs(tip.z-other.z)<=other.d/2+.35);
+   if(joined)continue;
+   const x=vertical?road.x:tip.x-direction*1.6;
+   const z=vertical?tip.z-direction*1.6:road.z;
+   const width=vertical?road.w:road.d;
+   const obstacle={id:`road-end-gate-${index}-${direction<0?'minus':'plus'}`,
+    x,z,w:vertical?width:.55,d:vertical?.55:width,h:1.65,
+    kind:'road-gate',rotation:0};
+   const blocked=e.obstacles.some(o=>o.kind!=='tree'&&o.kind!=='rock'&&
+    Math.abs(o.x-x)<(o.w+obstacle.w)/2+.4&&
+    Math.abs(o.z-z)<(o.d+obstacle.d)/2+.4);
+   if(!blocked)endGates.push(obstacle);
+  }
+ }
+ e.obstacles.push(...endGates);
+
  const radiation=e.radiationZones.find(r=>r.id==="silo-radiation");if(radiation)Object.assign(radiation,{radius:50,w:100,d:100,shape:"rect"});
  e.terrain=(e.terrain??[]).filter(t=>t.kind!=="river");
  e.terrain.push(
@@ -4667,10 +4694,79 @@ function __bcMapUpdate107(e){
  );
  for(const spawn of e.enemySpawns??[])for(const water of e.terrain.filter(t=>["river","reservoir"].includes(t.kind)))if(Math.abs(spawn.x-water.x)<=water.w/2+1&&Math.abs(spawn.z-water.z)<=water.d/2+1){spawn.x=Math.min(e.size/2-2,water.x+water.w/2+5);break;}
  return e;
-}__bcMapUpdate107(WORLD);
+}// Shared authored-world transformation. Runs before indoor walls/loot are derived.
+function __bcNatureWorld122(e){
+ const fields=e.terrain.filter(t=>t.kind==='field');
+ e.terrain=e.terrain.filter(t=>t.kind!=='river');
+ // Contiguous volumes reach beyond both map edges; the same volumes drive spawn rejection.
+ for(let i=0;i<12;i++){
+  const z=-220+i*40,x=104+4*Math.sin(z*.013)+2*Math.sin(z*.031);
+  e.terrain.push({id:'river-nature-'+i,kind:'river',x,z,w:20+2*Math.sin(z*.019),d:40});
+ }
+ const waters=e.terrain.filter(t=>t.kind==='river'||t.kind==='reservoir');
+ const overlap=(a,b,g=0)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+g&&Math.abs(a.z-b.z)<(a.d+b.d)/2+g;
+ const roadAt=(x,z,margin=0)=>e.roads.some(r=>Math.abs(x-r.x)<r.w/2+margin&&Math.abs(z-r.z)<r.d/2+margin);
+ e.obstacles=e.obstacles.filter(o=>!o.id.startsWith('river-fence-'));
+ const movable=e.obstacles.filter(o=>!['tree','rock','wood-fence','road-gate','blast-wall','interior-wall','interior-window'].includes(o.kind));
+ for(const o of movable){
+  if(![...waters.filter(t=>t.kind==='river'),...fields].some(t=>overlap(o,t,2)))continue;
+  const ox=o.x,oz=o.z;
+  let best=null;
+  for(let radius=4;radius<200&&!best;radius+=4)for(let k=0;k<40;k++){
+   const a=k*Math.PI/20,c={...o,x:ox+Math.cos(a)*radius,z:oz+Math.sin(a)*radius};
+   if(Math.abs(c.x)+c.w/2>e.size/2-8||Math.abs(c.z)+c.d/2>e.size/2-8)continue;
+   if([...waters,...fields,...e.roads].some(t=>overlap(c,t,2)))continue;
+   if(e.obstacles.some(b=>b!==o&&!['tree','rock'].includes(b.kind)&&overlap(c,b,3)))continue;
+   best=c;break;
+  }
+  if(!best)throw Error('No natural-world placement for '+o.id);
+  o.x=best.x;o.z=best.z;
+  for(const l of e.lootSpawns)if(Math.abs(l.x-ox)<o.w/2+2&&Math.abs(l.z-oz)<o.d/2+2){l.x+=o.x-ox;l.z+=o.z-oz;}
+ }
+ const barn={id:'farm-red-barn-122',kind:'farm-barn',x:151,z:219,w:15,d:17,h:8,rotation:0,color:'#a63c32'};
+ if([...e.obstacles,...fields,...waters,...e.roads].some(o=>!['tree','rock'].includes(o.kind)&&overlap(o,barn,2)))throw Error('Barn site blocked');
+ e.obstacles.push(barn);
+ e.obstacles=e.obstacles.filter(o=>!['tree','rock'].includes(o.kind)||(![...waters,...movable,barn].some(t=>overlap(o,t,1.5))&&!fields.some(t=>overlap(o,t,9))));
+ // Continuous riverside collision fences, with openings only at crossing roads.
+ // Conservative envelope covers tiny step changes between adjacent water volumes.
+ const rivers=e.terrain.filter(t=>t.kind==='river');
+ const previousBanks={};
+ for(let z=-240;z<240;z+=2){
+  const nearby=rivers.filter(t=>Math.abs(z+1-t.z)<=t.d/2+2);
+  const left=Math.min(...nearby.map(t=>t.x-t.w/2))-.8,right=Math.max(...nearby.map(t=>t.x+t.w/2))+.8;
+  for(const [side,x] of [['w',left],['e',right]]){
+   if(!roadAt(x,z+1,1)){
+    e.obstacles.push({id:'river-fence-122-'+side+'-'+z,kind:'wood-fence',x,z:z+1,w:.65,d:2.6,h:1.15,rotation:0});
+    const prev=previousBanks[side];
+    if(prev!==undefined&&Math.abs(prev-x)>.2&&!roadAt((x+prev)/2,z,1))e.obstacles.push({id:'river-fence-122-joint-'+side+'-'+z,kind:'wood-fence',x:(x+prev)/2,z,w:Math.abs(prev-x)+.65,d:.65,h:1.15,rotation:0});
+   }
+   previousBanks[side]=x;
+  }
+ }
+ for(const r of e.roads.filter(r=>r.w>r.d)){
+  const t=rivers.find(t=>Math.abs(r.z-t.z)<=t.d/2);if(!t||Math.abs(t.x-r.x)>r.w/2)continue;
+  for(const sign of [-1,1])e.obstacles.push({id:'river-fence-122-bridge-'+r.z+'-'+sign,kind:'wood-fence',x:t.x,z:r.z+sign*(r.d/2+1),w:t.w+5,d:.65,h:1.4,rotation:0});
+ }
+ // Relocate outdoor caches and authored enemy anchors out of every water tile.
+ for(const p of [...e.lootSpawns,...e.enemySpawns]){
+  if(!waters.some(t=>overlap({x:p.x,z:p.z,w:1.5,d:1.5},t,1)))continue;
+  const ox=p.x,oz=p.z;let found=false;
+  for(let radius=3;radius<100&&!found;radius+=2)for(let k=0;k<32;k++){
+   const a=k*Math.PI/16,c={x:ox+Math.cos(a)*radius,z:oz+Math.sin(a)*radius,w:1.5,d:1.5};
+   if(waters.some(t=>overlap(c,t,2))||e.obstacles.some(t=>overlap(c,t,1))||e.lootSpawns.some(l=>l!==p&&Math.hypot(c.x-l.x,c.z-l.z)<3.2))continue;
+   p.x=c.x;p.z=c.z;found=true;break;
+  }
+  if(!found)throw Error('No dry spawn for '+p.id);
+ }
+ return e;
+}
+
+__bcMapUpdate107(WORLD);__bcNatureWorld122(WORLD);
 
 const ENTERABLE_KINDS=new Set<WorldBuildingKind>(['hut','armory','generator','office','support-center','barracks','hydro','market','workshop','bunker']);
 const buildingSources=WORLD.obstacles.filter((o):o is WorldObstacle&{kind:WorldBuildingKind}=>ENTERABLE_KINDS.has(o.kind as WorldBuildingKind));
+// Keep authored tree colliders clear of building walls and roof overhangs.
+WORLD.obstacles=WORLD.obstacles.filter(o=>o.kind!=='tree'||!buildingSources.some(b=>Math.abs(o.x-b.x)<(o.w+b.w)/2+1&&Math.abs(o.z-b.z)<(o.d+b.d)/2+1));
 const palette:Record<WorldBuildingKind,{wall:string;floor:string;roof:string;pool:string}>={
  hut:{wall:'#697d80',floor:'#647477',roof:'#87999b',pool:'village'},armory:{wall:'#53656b',floor:'#59696c',roof:'#73868b',pool:'military'},generator:{wall:'#60757a',floor:'#58696d',roof:'#7e9297',pool:'industrial'},office:{wall:'#63777a',floor:'#617174',roof:'#83979a',pool:'rare'},'support-center':{wall:'#61777b',floor:'#607174',roof:'#82979b',pool:'medical'},barracks:{wall:'#6a817e',floor:'#677875',roof:'#8da6a2',pool:'medical'},hydro:{wall:'#58747c',floor:'#597078',roof:'#7898a1',pool:'industrial'},market:{wall:'#596b5c',floor:'#5e6c61',roof:'#798b7a',pool:'rare'},workshop:{wall:'#647176',floor:'#5e686c',roof:'#858f92',pool:'industrial'},bunker:{wall:'#505f64',floor:'#555f62',roof:'#6f7d80',pool:'military'}
 };
@@ -4711,13 +4807,21 @@ for(const spec of ACCESS_ROOM_SPECS){
  }
 }
 const DOCUMENT_CABINETS=[
- ['camp-building-0',-1.4,-1.2],['camp-building-3',1.4,1.1],['support-building-0',-1.6,1.1],
+ ['camp-building-0',2.2,1.8],['camp-building-3',1.4,1.1],['support-building-0',-1.6,1.1],
  ['support-building-3',1.7,-1.1],['hydro-building-0',-1.5,-1.1],['hydro-building-3',1.5,1.1],
  ['fishing-building-0',-1.4,1.1],['quiet-building-3',1.4,-1.1],['ruins-building-0',-1.3,-1.1],
- ['moon-building-0',1.3,1.1],['wheat-building-0',-1.4,1.1],['wheat-building-3',1.4,-1.1]
+ ['moon-building-0',1.3,1.1],['wheat-building-0',2.2,-1.8],['wheat-building-3',1.4,-1.1]
 ] as const;
 for(const [buildingId,dx,dz] of DOCUMENT_CABINETS){
  const b=ENTERABLE_BUILDINGS.find(candidate=>candidate.id===buildingId);
  if(!b)continue;
  WORLD.lootSpawns.push({id:'file-cabinet-'+buildingId,x:b.x+dx,z:b.z+dz,pool:'documents',tier:1+(Math.abs(Math.round(b.x+b.z))%4),buildingId,containerKind:'locker',searchSeconds:2.8});
 }
+
+// Older outdoor caches can end up beside generated indoor containers after a building move.
+for(const [id,x,z] of [['market-cache-0',-174,-195],['fishing-cache-3',-132,157]] as const){
+ const cache=WORLD.lootSpawns.find(spawn=>spawn.id===id);
+ if(cache){cache.x=x;cache.z=z;}
+}
+const hydroInteriorCache=WORLD.lootSpawns.find(spawn=>spawn.id==='hydro-cache-2');
+if(hydroInteriorCache)hydroInteriorCache.buildingId='hydro-building-2';

@@ -140,6 +140,20 @@ function building(w:number,d:number,h:number,color:string,label:string){const g=
  const sign=textPlate(g,label,'#f3e8c4',color,Math.min(w-.4,3),.62);sign.position.set(0,h-.42,d/2+.09);
  cylinder(g,'#654f40',w*.27,h+.9,-d*.23,.23,2);ball(g,C.snow,w*.27,h+1.95,-d*.23,.33,.16,.33);return g;}
 function cover(o:Obj){const custom=buildArcticStructure(o as WorldObstacle);if(custom)return custom;const g=new T.Group();const w=o.w??o.width??2,d=o.d??o.depth??1,h=o.h??o.height??1;const kind=o.kind??o.type??'barrier';
+ if(kind==="road-gate"){
+  const alongX=w>d,span=alongX?w:d,edge=-span/2+.42;
+  const piece=(color:string,at:number,y:number,length:number,height:number,width:number)=>
+   block(g,color,alongX?at:0,y,alongX?0:at,alongX?length:width,height,alongX?width:length);
+  piece("#242c30",edge,.09,.85,.18,.85);
+  piece("#e4b91b",edge,.84,.72,1.5,.72);
+  piece("#f4cf27",edge,1.62,.8,.12,.8);
+  piece("#343b3d",edge,1.7,.24,.24,.24);
+  const armStart=edge+.3,armLength=Math.max(1.5,span-.82);
+  piece("#f0f2ed",armStart+armLength/2,1.75,armLength,.19,.17);
+  for(let k=0;k<Math.floor(armLength/1.6);k++)piece("#b92a2b",armStart+1+k*1.6,1.77,.75,.075,.19);
+  piece("#333b3e",span/2-.3,1.25,.16,2.5,.16);
+  return g;
+ }
  if(/building|hut|workshop|cabin|warehouse|office|lab|generator/.test(kind)){return building(w,d,h,o.color??C.teal,o.label??'BLUECAP');}
  if(/rock/.test(kind))return rock(w*.55,h,d*.55);
  if(/container/.test(kind)){block(g,o.color??C.red,0,h/2,0,w,h,d);for(let x=-w/2+.15;x<w/2;x+=.27)block(g,'#75493b',x,h/2,d/2+.012,.035,h*.89,.028);for(const x of [-w/2+.08,w/2-.08])block(g,C.trim,x,h/2,d/2+.035,.06,h,.045);block(g,C.snow,0,h+.04,0,w+.1,.13,d+.1);const sign=textPlate(g,'BC • 07','#e8dabb','#4a6060',Math.min(w*.7,2),.5);sign.position.set(0,h*.6,d/2+.07);return g;}
@@ -162,7 +176,7 @@ export class SceneView {
  start(world:Obj,playerId:string){this.resetScope();this.movement.reset();this.inRaid=true;this.playerId=playerId;this.clearStage();this.baseObstacles=(world.obstacles??[]).filter((o:Obj)=>!o.accessDoorId).map((o:Obj)=>({...o}));this.world={...world,obstacles:[...this.baseObstacles]};world=this.world;this.foliage.reset(world as WorldDef);this.raidFX.reset(world);this.actors.remove(this.preview.root);this.actorMap.clear();this.actors.clear();const g=new T.Group();const size=world.size??world.width??120;const groundMat=mat('#c0cfbf');const ground=mesh(new T.PlaneGeometry(size+60,size+60),groundMat,g,0,-.04,0);ground.rotation.x=-Math.PI/2;ground.castShadow=false;
  const water=mesh(new T.PlaneGeometry(size+100,35),mat('#649699',.24,.15),g,0,-.3,-size/2-12);water.rotation.x=-Math.PI/2;water.castShadow=false;
  const obstacles=world.obstacles??world.colliders??world.objects??[];for(const o of obstacles){if(o.kind==='interior-wall'||o.kind==='interior-window')continue;const ob=cover(o);ob.position.set(o.x,0,o.z);ob.rotation.y=o.rotation??o.yaw??0;if(o.kind==='blast-wall'){ob.traverse((part)=>{part.userData.occluder=true;});this.stage.add(ob);this.occlusion.add(ob,{x:o.x,z:o.z,w:o.w,d:o.d,wallHeight:o.h});continue;}g.add(ob);}
- const rng=random(154);for(let i=0;i<130;i++){const x=(rng()-.5)*size,z=(rng()-.5)*size;if(Math.abs(x)<size*.41&&Math.abs(z)<size*.41)continue;const p=pine(.7+rng()*.8);p.position.set(x,0,z);p.rotation.y=rng()*7;g.add(p);}
+ const rng=random(154);for(let i=0;i<130;i++){const x=(rng()-.5)*size,z=(rng()-.5)*size;if(Math.abs(x)<size*.41&&Math.abs(z)<size*.41)continue;if((world.buildings??[]).some((b:Obj)=>Math.abs(x-b.x)<b.w/2+2&&Math.abs(z-b.z)<b.d/2+2))continue;const p=pine(.7+rng()*.8);p.position.set(x,0,z);p.rotation.y=rng()*7;g.add(p);}
  for(let i=0;i<85;i++){const x=(rng()-.5)*size,z=(rng()-.5)*size;const r=rock(.2+rng()*.35,.12+rng()*.2,.2+rng()*.4);r.position.set(x,0,z);g.add(r);}
  for(const e of (world.extractions??[]).filter((e:Obj)=>e.kind==='fixed')){const mark=mesh(new T.RingGeometry((e.radius??5)-.16,e.radius??5,48),new T.MeshBasicMaterial({color:'#d4b86b',side:T.DoubleSide}),g,e.x,.075,e.z);mark.rotation.x=-Math.PI/2;for(let i=-1;i<=1;i+=2){block(g,'#dfd7aa',e.x+i*.6,.08,e.z,.18,.03,1.8);}block(g,'#dfd7aa',e.x,.081,e.z,1.2,.03,.17);for(let i=0;i<4;i++){const a=i*Math.PI/2;cylinder(g,C.orange,e.x+Math.sin(a)*3.3,.3,e.z+Math.cos(a)*3.3,.14,.6);}}
  // Coastline details anchor the outpost as a place rather than an arena.

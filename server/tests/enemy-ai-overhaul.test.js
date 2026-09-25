@@ -11,7 +11,7 @@ import {ENEMY_STAMINA_MAX,initializeEnemyStamina,updateEnemyStamina} from '../en
 import {advanceEnemyPatrol} from '../enemyPatrol.js';
 import {alertMajorResponse,ORDINARY_FORCE_MULTIPLIER,REDUCED_RADIATION_GUARDS,tacticalGoal,updateMajorResponseTracking} from '../enemyForces.js';
 import {updateSquadPatrolEvent} from '../squadPatrolEvent.js';
-import {planRadiationWeaponSpawns,RADIATION_WEAPON_CRATE_MIN,RADIATION_WEAPON_CRATE_MAX} from '../loot.js';
+import {planRadiationWeaponSpawns,RADIATION_WEAPON_CRATE_MIN,RADIATION_WEAPON_CRATE_MAX,inRadiation} from '../loot.js';
 
 const catalog=normalizeCatalog({items:ITEMS,talents:TALENTS});
 const db={profile:()=>({talents:[]}),updateRaidLoot(){},updateRaidInventoryState(){},settleRaidPlayer(){return {applied:true};},markRaidCompleteIfSettled(){}};
@@ -263,7 +263,7 @@ test('radiation weapon chest planner fixes each raid to four or five weapon ches
   assert.ok(plan.size===RADIATION_WEAPON_CRATE_MIN||plan.size===RADIATION_WEAPON_CRATE_MAX,'seed '+seed+' => '+plan.size);
   assert.equal(plan.size,RADIATION_WEAPON_CRATE_MIN+seed%2);
  }
- const raid=raidFor(),radiationSpawns=WORLD.lootSpawns.filter(spawn=>spawn.pool!=='documents'&&WORLD.radiationZones.some(zone=>Math.hypot(spawn.x-zone.x,spawn.z-zone.z)<=zone.radius));
+ const raid=raidFor(),radiationSpawns=WORLD.lootSpawns.filter(spawn=>spawn.pool!=='documents'&&inRadiation(WORLD,spawn));
  const weaponCount=radiationSpawns.filter(spawn=>raid.containers.get(spawn.id)?.kind==='military').length;
  assert.ok(weaponCount===4||weaponCount===5,'actual raid weapon chests '+weaponCount);
 });

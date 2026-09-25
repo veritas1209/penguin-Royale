@@ -8,13 +8,14 @@ import {
 import {
  rollWeaponCrateContents as __rollWeaponCrateContents29,
  rollWorldContainer as __rollWorldContainer29,
- planRadiationWeaponSpawns as __planRadiationWeaponSpawns29
+ planRadiationWeaponSpawns as __planRadiationWeaponSpawns29,
+ inRadiation as __inRadiation29
 } from '../loot.js';
 import {
  Raid as __Raid29,
  normalizeCatalog as __normalizeCatalog29
 } from '../game.js';
-import test from 'node:test';import assert from 'node:assert/strict';import {createHash} from 'node:crypto';import {ITEMS,TALENTS} from '../../shared/catalog.ts';import {WORLD} from '../../shared/world.ts';import {normalizeCatalog,Raid} from '../game.js';import {rollWorldContainer,lootQuantity} from '../loot.js';import {enemyRewardStacks} from '../bosses.js';import {isPasswordLetter} from '../access.js';
+import test from 'node:test';import assert from 'node:assert/strict';import {createHash} from 'node:crypto';import {ITEMS,TALENTS} from '../../shared/catalog.ts';import {WORLD} from '../../shared/world.ts';import {normalizeCatalog,Raid} from '../game.js';import {rollWorldContainer,lootQuantity,inRadiation} from '../loot.js';import {enemyRewardStacks} from '../bosses.js';import {isPasswordLetter} from '../access.js';
 const catalog=normalizeCatalog({items:ITEMS,talents:TALENTS});function seeded(seed){let n=seed;return()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296;};}
 test('boss equipment slots independently follow normal and radiation grade policies',()=>{
  const catalog=
@@ -681,14 +682,7 @@ test('actual radioactive weapon containers keep mixed military loot and public s
  let military=0;
 
  for(const spawn of __WORLD29.lootSpawns){
-  const radiation=
-   (__WORLD29.radiationZones??[])
-    .some(zone=>
-     Math.hypot(
-      spawn.x-zone.x,
-      spawn.z-zone.z
-     )<=zone.radius
-    );
+  const radiation=__inRadiation29(__WORLD29,spawn);
 
   if(!radiation)continue;
 
@@ -755,6 +749,21 @@ test('actual radioactive weapon containers keep mixed military loot and public s
 
 
 
+test('square radiation includes indoor corner crates and all radioactive crates search for six seconds',()=>{
+ const zone=WORLD.radiationZones[0];
+ const corners=WORLD.lootSpawns.filter(spawn=>spawn.buildingId&&spawn.pool!=='documents'&&
+  Math.abs(spawn.x-zone.x)<=zone.w/2&&Math.abs(spawn.z-zone.z)<=zone.d/2&&
+  Math.hypot(spawn.x-zone.x,spawn.z-zone.z)>zone.radius);
+ assert.ok(corners.length>=2,'expected the two missed indoor crates');
+ const raid=new Raid({id:'radiation-rect-crates',room:{mode:'solo',members:new Map()},escrow:[],db:{},catalog,world:WORLD,now:()=>1000,emit(){}});
+ for(const spawn of WORLD.lootSpawns.filter(spawn=>spawn.pool!=='documents'&&inRadiation(WORLD,spawn))){
+  const container=raid.containers.get(spawn.id);
+  assert.ok(container,spawn.id+' missing');
+  assert.ok(['rare','military'].includes(container.kind),spawn.id+' wrong kind');
+  assert.equal(container.searchSeconds,6,spawn.id+' search duration');
+ }
+ for(const spawn of corners)assert.ok(['rare','military'].includes(raid.containers.get(spawn.id)?.kind),spawn.id);
+});
 test('radiation sale crates contain one or two password letters total while black vault and military crates contain none',()=>{
  const raid=new Raid({id:'radiation-letter-cap',room:{mode:'solo',members:new Map()},escrow:[],db:{},catalog,world:WORLD,now:()=>1000,emit(){}});
  let saleLetters=0;
@@ -762,7 +771,7 @@ test('radiation sale crates contain one or two password letters total while blac
   const container=raid.containers.get(spawn.id);if(!container)continue;
   const letters=container.items.filter(stack=>isPasswordLetter(stack.itemId));
   if(spawn.accessDoorId==='access-door-black')assert.equal(letters.length,0,'black vault '+spawn.id);
-  const radioactive=WORLD.radiationZones.some(zone=>Math.hypot(spawn.x-zone.x,spawn.z-zone.z)<=zone.radius);
+  const radioactive=inRadiation(WORLD,spawn);
   if(!radioactive)continue;
   if(container.kind==='military')assert.equal(letters.length,0,'military '+spawn.id);
   else if(container.kind==='rare'&&spawn.accessDoorId!=='access-door-black')saleLetters+=letters.length;

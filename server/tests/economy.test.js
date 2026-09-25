@@ -4,7 +4,7 @@ import {ITEMS,ITEM_BY_ID as byId,TALENTS} from '../../shared/catalog.ts';
 import {getMetroMapLootWeight,METRO_PRICE_EVIDENCE} from '../../shared/metroEconomy.ts';
 import {WORLD} from '../../shared/world.ts';
 import {Raid,normalizeCatalog} from '../game.js';
-import {SUPPLY_PACKS} from '../loot.js';
+import {SUPPLY_PACKS,inRadiation} from '../loot.js';
 
 test('sourced Metro prices and save aliases are visible in final catalog',()=>{
  for(const [id,e]of Object.entries(METRO_PRICE_EVIDENCE)){if(e.price!==undefined)assert.equal(byId[id].price,e.price);if(e.sell!==undefined)assert.equal(byId[id].sell,e.sell);}
@@ -44,7 +44,7 @@ test('map valuables exclude PvP trophies and unknown originals; exceptional loot
   if(item.category!=='valuable')continue;
   const spawn=WORLD.lootSpawns.find(s=>s.id===loot.id);
   if(spawn.pool==='documents'){assert.equal(stack.quantity,1);assert.ok(['metro-2036','old-video-tape','torn-map','torn-blueprint','precision-blueprint','top-secret-intelligence','password-letter-white','password-letter-green','password-letter-yellow','password-letter-red','password-letter-black'].includes(item.id),'document cabinet explicit pool: '+item.id);continue;}
-  const radiationZone=WORLD.radiationZones.some(z=>Math.hypot(spawn.x-z.x,spawn.z-z.z)<=z.radius);
+  const radiationZone=inRadiation(WORLD,spawn);
   assert.ok(getMetroMapLootWeight(item,{nodeTier:radiationZone?Math.max(6,spawn.tier):spawn.tier,radiationZone})>0,loot.itemId);
  }
 });

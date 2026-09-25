@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLUECAP Combat Lab</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0b151b;color:#e8f1ed}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#203b44,#0b151b 55%);min-height:100vh}
+header{padding:28px clamp(20px,4vw,64px) 18px;border-bottom:1px solid #37505a;background:#102229aa}
+.eyebrow{color:#e7be70;font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}h1{margin:7px 0 4px;font-size:clamp(24px,3vw,38px);letter-spacing:.01em}
+.sub{color:#9eb9ba;font-size:13px}.engine{font-family:Consolas,monospace;color:#78abb4}
+main{max-width:1600px;margin:0 auto;padding:24px clamp(16px,3vw,48px);display:grid;grid-template-columns:minmax(0,1.65fr) minmax(310px,.75fr);gap:20px}
+.panel{border:1px solid #38535c;background:#13252dcf;box-shadow:0 12px 40px #0005;border-radius:4px;overflow:hidden}
+.panel-head{padding:14px 18px;border-bottom:1px solid #334d54;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.panel-head b{letter-spacing:.06em}.tag{font-size:11px;color:#d9bf79;text-transform:uppercase;letter-spacing:.13em}
+#field{display:block;width:100%;height:auto;background:#172b31;cursor:crosshair}.controls{padding:18px;border-top:1px solid #334d54}
+.transport{display:flex;align-items:center;gap:15px}button{background:#e7bc6c;border:0;color:#1a2426;font-weight:900;padding:10px 15px;cursor:pointer;border-radius:2px}
+input[type=range]{width:100%;accent-color:#e7bc6c;margin:12px 0}.ticks{display:flex;justify-content:space-between;color:#95aeb1;font-size:12px;font-family:Consolas,monospace}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}.stat{padding:12px;background:#172c34;border:1px solid #35515b}.stat span{display:block;color:#9ab3b4;font-size:10px;text-transform:uppercase;letter-spacing:.1em}.stat strong{display:block;margin-top:5px;font-size:22px;color:#f1cb82}
+.side{display:flex;flex-direction:column;gap:20px}.section-body{padding:14px 18px;max-height:350px;overflow:auto}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #ffffff12;font-size:13px}.row:last-child{border-bottom:0}.muted{color:#91acae}
+.event{padding:9px 0;border-bottom:1px solid #ffffff15;cursor:pointer;font-size:12px;line-height:1.5}.event:hover{color:#f1cb82}.event time{color:#e7bc6c;font-family:Consolas,monospace;margin-right:8px}.event small{display:block;color:#9fb7b7;margin-left:48px;font-family:Consolas,monospace}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:#abc1c2;margin-top:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}.player{background:#78c8da}.enemy{background:#ef8279}.dead{background:#67777c}
+details{border-top:1px solid #38535c;padding:10px 18px;color:#9cb2b4;font-size:12px}pre{overflow:auto;max-height:300px;white-space:pre-wrap;word-break:break-word;color:#d3e1dc}
+footer{text-align:center;color:#789499;padding:10px 20px 28px;font-size:11px}
+@media(max-width:980px){main{display:block}.side{margin-top:20px}.stats{grid-template-columns:repeat(2,1fr)}}
+</style></head><body>
+<header><div class="eyebrow">BLUECAP / OFFLINE COMBAT LAB</div><h1 id="title"></h1><div class="sub" id="subtitle"></div></header>
+<main><div>
+ <div class="stats"><div class="stat"><span>Damage dealt</span><strong id="damage"></strong></div><div class="stat"><span>Damage events</span><strong id="hits"></strong></div><div class="stat"><span>Kills</span><strong id="kills"></strong></div><div class="stat"><span>Player HP</span><strong id="playerhp"></strong></div></div>
+ <section class="panel"><div class="panel-head"><b>TACTICAL FIELD</b><span class="tag" id="time"></span></div><canvas id="field" width="1000" height="650"></canvas>
+ <div class="controls"><div class="transport"><button id="play">PLAY</button><span class="muted">Drag to inspect each simulation step</span></div><input id="scrub" type="range" min="0" value="0"><div class="ticks"><span>0.0 s</span><span id="duration"></span></div>
+ <div class="legend"><span><i class="dot player"></i>Player</span><span><i class="dot enemy"></i>Enemy</span><span><i class="dot dead"></i>Defeated</span><span>Dashed rings: active areas</span></div></div></section>
+ </div><div class="side">
+ <section class="panel"><div class="panel-head"><b>STATE</b><span class="tag">At selected time</span></div><div class="section-body" id="state"></div></section>
+ <section class="panel"><div class="panel-head"><b>EVENT LOG</b><span class="tag" id="eventcount"></span></div><div class="section-body" id="events"></div></section>
+ <section class="panel"><div class="panel-head"><b>SCENARIO</b><span class="tag">Local JSON</span></div><details><summary>Show scenario configuration</summary><pre id="scenario"></pre></details></section>
+ </div></main><footer>Uses a copied snapshot of the game's Raid combat modules. File-only report; no server, account, or database.</footer>
+<script type="application/json" id="payload">__SIM_DATA__</script>
+<script>
+const data=JSON.parse(document.getElementById('payload').textContent);
+const $=id=>document.getElementById(id);
+$('title').textContent=data.name;
+$('subtitle').innerHTML='';
+$('subtitle').textContent=data.weaponName+' / '+data.weaponId+'   |   Engine '+data.engineHash;
+$('damage').textContent=Math.round(data.summary.dealt);
+$('hits').textContent=data.summary.hits;
+$('kills').textContent=data.summary.kills;
+$('playerhp').textContent=Math.round(data.summary.playerHp);
+$('duration').textContent=(data.durationMs/1000).toFixed(1)+' s';
+$('eventcount').textContent=data.events.length+' events';
+$('scenario').textContent=JSON.stringify(data.scenario,null,2);
+const canvas=$('field'),ctx=canvas.getContext('2d'),slider=$('scrub');
+slider.max=data.frames.length-1;
+let index=0,timer=null;
+const points=[...data.frames.flatMap(f=>[f.player,...f.enemies]),...(data.scenario.obstacles??[])];
+let minX=Math.min(-7,...points.map(p=>p.x))-5,maxX=Math.max(7,...points.map(p=>p.x))+5;
+let minZ=Math.min(-7,...points.map(p=>p.z))-5,maxZ=Math.max(7,...points.map(p=>p.z))+5;
+const range=Math.max(maxX-minX,maxZ-minZ);
+const midX=(minX+maxX)/2,midZ=(minZ+maxZ)/2;
+minX=midX-range/2;maxX=midX+range/2;minZ=midZ-range/2;maxZ=midZ+range/2;
+const scale=Math.min((canvas.width-90)/(maxX-minX),(canvas.height-90)/(maxZ-minZ));
+const px=x=>canvas.width/2+(x-midX)*scale,pz=z=>canvas.height/2-(z-midZ)*scale;
+function circle(x,z,r,color,stroke){
+ ctx.beginPath();ctx.arc(px(x),pz(z),Math.max(2,r*scale),0,Math.PI*2);
+ if(color){ctx.fillStyle=color;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}
+}
+function draw(){
+ const frame=data.frames[index];$('time').textContent=(frame.atMs/1000).toFixed(2)+' s';
+ ctx.fillStyle='#172b31';ctx.fillRect(0,0,canvas.width,canvas.height);
+ ctx.lineWidth=1;ctx.strokeStyle='#33525a';
+ for(let x=Math.ceil(minX/5)*5;x<=maxX;x+=5){ctx.beginPath();ctx.moveTo(px(x),0);ctx.lineTo(px(x),canvas.height);ctx.stroke()}
+ for(let z=Math.ceil(minZ/5)*5;z<=maxZ;z+=5){ctx.beginPath();ctx.moveTo(0,pz(z));ctx.lineTo(canvas.width,pz(z));ctx.stroke()}
+ for(const ob of data.scenario.obstacles??[]){ctx.fillStyle='#667e7d';ctx.fillRect(px(ob.x-ob.w/2),pz(ob.z+ob.d/2),ob.w*scale,ob.d*scale)}
+ for(const area of frame.areas){ctx.save();ctx.setLineDash([8,6]);ctx.lineWidth=2;circle(area.x,area.z,area.radius,null,'#eabf70');ctx.restore()}
+ for(const shot of frame.projectiles)circle(shot.x,shot.z,.12,shot.hostile?'#ff947f':'#f6d482');
+ for(const enemy of frame.enemies){
+  const color=enemy.alive?'#ed8278':'#67777c';
+  circle(enemy.x,enemy.z,.5,color,'#f4e2c099');
+  ctx.fillStyle='#e4efeb';ctx.font='12px Segoe UI';ctx.textAlign='center';ctx.fillText(enemy.name,px(enemy.x),pz(enemy.z)-17);
+  ctx.fillStyle='#20353b';ctx.fillRect(px(enemy.x)-23,pz(enemy.z)+13,46,5);
+  ctx.fillStyle=color;ctx.fillRect(px(enemy.x)-23,pz(enemy.z)+13,46*Math.max(0,enemy.hp/enemy.maxHp),5);
+ }
+ const p=frame.player;circle(p.x,p.z,.55,'#74c9dc','#e8f7f4');
+ ctx.strokeStyle='#b5e5ef';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px(p.x),pz(p.z));
+ ctx.lineTo(px(p.x)+Math.sin(p.yaw)*27,pz(p.z)-Math.cos(p.yaw)*27);ctx.stroke();
+ ctx.fillStyle='#d9f2f2';ctx.font='bold 13px Segoe UI';ctx.textAlign='center';ctx.fillText('PLAYER',px(p.x),pz(p.z)-19);
+ const rows=[['Player HP',Math.round(p.hp)+' / '+Math.round(p.maxHp)],['Stamina',Math.round(p.stamina)],...frame.enemies.map(e=>[e.name,Math.round(e.hp)+' / '+Math.round(e.maxHp)+(e.ai?'  AI':'  dummy')])];
+ $('state').replaceChildren(...rows.map(([label,value])=>{const row=document.createElement('div');row.className='row';const a=document.createElement('span'),b=document.createElement('b');a.textContent=label;b.textContent=value;row.append(a,b);return row}));
+ $('events').replaceChildren(...data.events.filter(e=>e.atMs<=frame.atMs).slice().reverse().map(e=>{const row=document.createElement('div');row.className='event';const t=document.createElement('time'),kind=document.createElement('b'),detail=document.createElement('small');t.textContent=(e.atMs/1000).toFixed(2)+'s';kind.textContent=e.kind;detail.textContent=Object.entries(e.data??{}).slice(0,5).map(([k,v])=>k+':'+(typeof v==='object'?JSON.stringify(v):v)).join('  ');row.append(t,kind,detail);row.onclick=()=>setFrame(Math.round(e.atMs/data.stepMs));return row}));
+}
+function setFrame(i){index=Math.max(0,Math.min(data.frames.length-1,i));slider.value=index;draw()}
+slider.oninput=()=>setFrame(Number(slider.value));
+$('play').onclick=()=>{if(timer){clearInterval(timer);timer=null;$('play').textContent='PLAY';return}
+ if(index>=data.frames.length-1)setFrame(0);$('play').textContent='PAUSE';
+ timer=setInterval(()=>{if(index>=data.frames.length-1){clearInterval(timer);timer=null;$('play').textContent='PLAY'}else setFrame(index+1)},Math.max(20,data.stepMs))};
+document.onkeydown=e=>{if(e.key==='ArrowRight')setFrame(index+1);if(e.key==='ArrowLeft')setFrame(index-1)};
+setFrame(0);
+</script></body></html>

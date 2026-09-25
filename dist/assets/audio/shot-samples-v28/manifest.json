@@ -1,0 +1,629 @@
+{
+  "version": 28,
+  "weapons": {
+    "akm": {
+      "source": "[Sound Dimension] Akm Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (TX-23oo17-s).mp3",
+      "normalStart": 4.108,
+      "suppressedStart": 15.388,
+      "suppressedMode": "recorded",
+      "duration": 0.38,
+      "normalBytes": 6447,
+      "suppressedBytes": 6447,
+      "normalPeak": 1.181,
+      "normalRms": 0.321
+    },
+    "groza": {
+      "source": "[Sound Dimension] Groza Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (PnvNkQh994o).mp3",
+      "normalStart": 4.04,
+      "suppressedStart": 17.898,
+      "suppressedMode": "recorded",
+      "duration": 0.38,
+      "normalBytes": 6449,
+      "suppressedBytes": 6449,
+      "normalPeak": 0.778,
+      "normalRms": 0.251
+    },
+    "beryl-m762": {
+      "source": "[Sound Dimension] M762 Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (r6P7qiZ7rx8).mp3",
+      "normalStart": 4.53,
+      "suppressedStart": 23.998,
+      "suppressedMode": "recorded",
+      "duration": 0.36,
+      "normalBytes": 6082,
+      "suppressedBytes": 6082,
+      "normalPeak": 1.127,
+      "normalRms": 0.413
+    },
+    "m416": {
+      "source": "[Sound Dimension] M416 Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (-jpwH5Cxwf8).mp3",
+      "normalStart": 10.1,
+      "suppressedStart": 23.59,
+      "suppressedMode": "recorded",
+      "duration": 0.29,
+      "normalBytes": 5351,
+      "suppressedBytes": 5351,
+      "normalPeak": 0.595,
+      "normalRms": 0.101
+    },
+    "mk47-mutant": {
+      "source": "[Sound Dimension] Mk47 Mutant Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (BVRZaEKjZKo).mp3",
+      "normalStart": 1.08,
+      "suppressedStart": 27.03,
+      "suppressedMode": "recorded",
+      "duration": 0.2,
+      "normalBytes": 3895,
+      "suppressedBytes": 3895,
+      "normalPeak": 1.242,
+      "normalRms": 0.493
+    },
+    "m16a4": {
+      "source": "[Sound Dimension] M16a4 Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (1B72d-oS7gg).mp3",
+      "normalStart": 7.468,
+      "suppressedStart": 23.668,
+      "suppressedMode": "recorded",
+      "duration": 0.36,
+      "normalBytes": 6083,
+      "suppressedBytes": 6083,
+      "normalPeak": 0.761,
+      "normalRms": 0.174
+    },
+    "scar-l": {
+      "source": "[Sound Dimension] Scar L Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (vHzyPlXQaWs).mp3",
+      "normalStart": 7.338,
+      "suppressedStart": 25.03,
+      "suppressedMode": "recorded",
+      "duration": 0.28,
+      "normalBytes": 4987,
+      "suppressedBytes": 4987,
+      "normalPeak": 0.271,
+      "normalRms": 0.064
+    },
+    "aug": {
+      "source": "[Sound Dimension] Aug Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (Gu4xgO0TTXY).mp3",
+      "normalStart": 5.31,
+      "suppressedStart": 21.408,
+      "suppressedMode": "recorded",
+      "duration": 0.34,
+      "normalBytes": 6081,
+      "suppressedBytes": 6081,
+      "normalPeak": 1.298,
+      "normalRms": 0.349
+    },
+    "qbz": {
+      "source": "[Sound Dimension] Qbz Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (EO-5RbWPtjc).mp3",
+      "normalStart": 5.068,
+      "suppressedStart": 17.418,
+      "suppressedMode": "recorded",
+      "duration": 0.32,
+      "normalBytes": 5716,
+      "suppressedBytes": 5716,
+      "normalPeak": 1.185,
+      "normalRms": 0.319
+    },
+    "g36c": {
+      "source": "[Sound Dimension] G36C Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (437B7ykNViA).mp3",
+      "normalStart": 8.078,
+      "suppressedStart": 20.488,
+      "suppressedMode": "recorded",
+      "duration": 0.32,
+      "normalBytes": 5624,
+      "suppressedBytes": 5624,
+      "normalPeak": 1.426,
+      "normalRms": 0.393
+    },
+    "famas": {
+      "source": "[Sound Dimension] Famas Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (7IyGvI-yaOY).mp3",
+      "normalStart": 10.3,
+      "suppressedStart": 24.338,
+      "suppressedMode": "recorded",
+      "duration": 0.3,
+      "normalBytes": 5259,
+      "suppressedBytes": 5259,
+      "normalPeak": 1.407,
+      "normalRms": 0.425
+    },
+    "asm-abakan": {
+      "source": "[Sound Dimension] Asm Abakan Gun Firing Sound Effect ｜ Pubg Mobile AR Gun Sounds (eEMofYxKEp8).mp3",
+      "normalStart": 10.778,
+      "suppressedStart": 33.868,
+      "suppressedMode": "recorded",
+      "duration": 0.3,
+      "normalBytes": 5357,
+      "suppressedBytes": 5357,
+      "normalPeak": 1.399,
+      "normalRms": 0.417
+    },
+    "mini-14": {
+      "source": "[Sound Dimension] Mini 14 Marksman Rifle Shot Sound Effect ｜ Pubg Mobile Dmr Sounds (C2QIqVKwRcg).mp3",
+      "normalStart": 0.388,
+      "suppressedStart": 7.12,
+      "suppressedMode": "recorded",
+      "duration": 0.48,
+      "normalBytes": 7920,
+      "suppressedBytes": 5726,
+      "normalPeak": 1.319,
+      "normalRms": 0.309,
+      "suppressedDuration": 0.32
+    },
+    "mk12": {
+      "source": "[Sound Dimension] MK12 Marksman Rifle Shot Sound Effect ｜ Pubg Mobile Dmr Sounds (g7K-c7Buvds).mp3",
+      "normalStart": 0.518,
+      "suppressedStart": 16.898,
+      "suppressedMode": "recorded",
+      "duration": 0.36,
+      "normalBytes": 6088,
+      "suppressedBytes": 6088,
+      "normalPeak": 1.303,
+      "normalRms": 0.417
+    },
+    "qbu": {
+      "source": "[Sound Dimension] QBU-88 Marksman Rifle Shot Sound Effect ｜ Pubg Mobile Dmr Sounds (xzcWq6lSbgg).mp3",
+      "normalStart": 0.768,
+      "suppressedStart": 7.588,
+      "suppressedMode": "recorded",
+      "duration": 0.42,
+      "normalBytes": 7188,
+      "suppressedBytes": 7188,
+      "normalPeak": 1.214,
+      "normalRms": 0.339
+    },
+    "sks": {
+      "source": "[Sound Dimension] SKS Marksman Rifle Shot Sound Effect ｜ Pubg Mobile Dmr Sounds (gNzvWpAcmn8).mp3",
+      "normalStart": 0.598,
+      "suppressedStart": 14.308,
+      "suppressedMode": "recorded",
+      "duration": 0.4,
+      "normalBytes": 6819,
+      "suppressedBytes": 6819,
+      "normalPeak": 1.164,
+      "normalRms": 0.256
+    },
+    "slr": {
+      "source": "[Sound Dimension] SLR Marksman Rifle Shot Sound Effect ｜ Pubg Mobile Dmr Sounds (aA6OPzxZOBQ).mp3",
+      "normalStart": 0.418,
+      "suppressedStart": 10.188,
+      "suppressedMode": "recorded",
+      "duration": 0.4,
+      "normalBytes": 6819,
+      "suppressedBytes": 6819,
+      "normalPeak": 0.617,
+      "normalRms": 0.135
+    },
+    "vss": {
+      "source": "[Sound Dimension] VSS Marksman Rifle Shot Sound Effect ｜ Pubg Mobile Dmr Sounds (KJtb3yBiVuc).mp3",
+      "normalStart": 6.758,
+      "suppressedStart": 6.758,
+      "suppressedMode": "not_applicable",
+      "duration": 0.4,
+      "normalBytes": 6819,
+      "suppressedBytes": 6819,
+      "normalPeak": 0.181,
+      "normalRms": 0.032
+    },
+    "kar98k": {
+      "source": "[Sound Dimension] Kar98K Sniper Rifle Shot Sound Effect ｜ Pubg Mobile Sniper Sounds (GhOjGdMhRfU).mp3",
+      "normalStart": 0.258,
+      "suppressedStart": 8.908,
+      "suppressedMode": "recorded",
+      "duration": 0.62,
+      "normalBytes": 9749,
+      "suppressedBytes": 9749,
+      "normalPeak": 1.01,
+      "normalRms": 0.192
+    },
+    "m24": {
+      "source": "[Sound Dimension] M24 Sniper Rifle Shot Sound Effect ｜ Pubg Mobile Sniper Sounds (ZZ12vFYqws8).mp3",
+      "normalStart": 0.328,
+      "suppressedStart": 8.268,
+      "suppressedMode": "recorded",
+      "duration": 0.62,
+      "normalBytes": 9746,
+      "suppressedBytes": 9746,
+      "normalPeak": 1.073,
+      "normalRms": 0.259
+    },
+    "awm": {
+      "source": "[Sound Dimension] Awm Sniper Rifle Shot Sound Effect ｜ Pubg Mobile Sniper Sounds (IcRzycEAj6Y).mp3",
+      "normalStart": 0.228,
+      "suppressedStart": 9.278,
+      "suppressedMode": "recorded",
+      "duration": 0.58,
+      "normalBytes": 9380,
+      "suppressedBytes": 9380,
+      "normalPeak": 1.11,
+      "normalRms": 0.267
+    },
+    "win94": {
+      "source": "[Sound Dimension] Win94 Sniper Rifle Shot Sound Effect ｜ Pubg Mobile Sniper Sounds (ddYuBRJi_bg).mp3",
+      "normalStart": 0.358,
+      "suppressedStart": 0.358,
+      "suppressedMode": "not_applicable",
+      "duration": 0.74,
+      "normalBytes": 11576,
+      "suppressedBytes": 11576,
+      "normalPeak": 0.95,
+      "normalRms": 0.189
+    },
+    "micro-uzi": {
+      "source": "[Sound Dimension] UZI Gun Firing Sound Effect ｜ Pubg Mobile Smg Gun Sounds (RTZSGL7ejww).mp3",
+      "normalStart": 7.338,
+      "suppressedStart": 12.758,
+      "suppressedMode": "recorded",
+      "duration": 0.16,
+      "normalBytes": 3522,
+      "suppressedBytes": 3522,
+      "normalPeak": 0.264,
+      "normalRms": 0.066
+    },
+    "ump": {
+      "source": "[Sound Dimension] UMP45 Gun Firing Sound Effect ｜ Pubg Mobile Smg Gun Sounds (J03EWj4Qqws).mp3",
+      "normalStart": 5.268,
+      "suppressedStart": 31.618,
+      "suppressedMode": "recorded",
+      "duration": 0.32,
+      "normalBytes": 5719,
+      "suppressedBytes": 5719,
+      "normalPeak": 1.22,
+      "normalRms": 0.288
+    },
+    "tommy-gun": {
+      "source": "[Sound Dimension] Thompson Gun Firing Sound Effect ｜ Pubg Mobile Smg Gun Sounds (s77ghkhXXZw).mp3",
+      "normalStart": 7.318,
+      "suppressedStart": 23.508,
+      "suppressedMode": "recorded",
+      "duration": 0.3,
+      "normalBytes": 5356,
+      "suppressedBytes": 5356,
+      "normalPeak": 0.478,
+      "normalRms": 0.168
+    },
+    "vector": {
+      "source": "[Sound Dimension] Vector Gun Firing Sound Effect ｜ Pubg Mobile Smg Gun Sounds (_qicP2m8Lp0).mp3",
+      "normalStart": 3.53,
+      "suppressedStart": 12.78,
+      "suppressedMode": "recorded",
+      "duration": 0.28,
+      "normalBytes": 4895,
+      "suppressedBytes": 4895,
+      "normalPeak": 0.768,
+      "normalRms": 0.167
+    },
+    "mp5k": {
+      "source": "[Sound Dimension] MP5K Gun Firing Sound Effect ｜ Pubg Mobile Smg Gun Sounds (GUNs3l_s9tg).mp3",
+      "normalStart": 7.628,
+      "suppressedStart": 23.188,
+      "suppressedMode": "recorded",
+      "duration": 0.32,
+      "normalBytes": 5718,
+      "suppressedBytes": 5718,
+      "normalPeak": 0.699,
+      "normalRms": 0.168
+    },
+    "pp19-bizon": {
+      "source": "[Sound Dimension] PP19 Bizon Gun Firing Sound Effect ｜ Pubg Mobile Smg Gun Sounds (0s1FIDli2l4).mp3",
+      "normalStart": 11.248,
+      "suppressedStart": 19.378,
+      "suppressedMode": "recorded",
+      "duration": 0.36,
+      "normalBytes": 6089,
+      "suppressedBytes": 6089,
+      "normalPeak": 1.266,
+      "normalRms": 0.292
+    },
+    "p90": {
+      "source": "[Sound Dimension] P90 2023 Gun Firing Sound Effect ｜ Pubg Mobile Smg Gun Sounds (1FEl4fvQ8Sg).mp3",
+      "normalStart": 5.608,
+      "suppressedStart": 19.878,
+      "suppressedMode": "not_applicable",
+      "duration": 0.33,
+      "normalBytes": 5722,
+      "suppressedBytes": 5722,
+      "normalPeak": 1.358,
+      "normalRms": 0.333
+    },
+    "s1897": {
+      "source": "[Sound Dimension] S1897 Gun Shot Sound Effect ｜ Pubg Mobile Shotgun Sounds (BGUOmTKCOok).mp3",
+      "normalStart": 0.538,
+      "suppressedStart": 0.538,
+      "suppressedMode": "not_applicable",
+      "duration": 0.8,
+      "normalBytes": 12300,
+      "suppressedBytes": 12300,
+      "normalPeak": 0.393,
+      "normalRms": 0.074
+    },
+    "s686": {
+      "source": "[Sound Dimension] S686 Gun Shot Sound Effect ｜ Pubg Mobile Shotgun Sounds (0fSKD50aCxI).mp3",
+      "normalStart": 0.648,
+      "suppressedStart": 0.648,
+      "suppressedMode": "not_applicable",
+      "duration": 0.55,
+      "normalBytes": 9007,
+      "suppressedBytes": 9007,
+      "normalPeak": 0.412,
+      "normalRms": 0.121
+    },
+    "s12k": {
+      "source": "[Sound Dimension] S12K Gun Shot Sound Effect ｜ Pubg Mobile Shotgun Sounds (p-2Q0wZtZ8Y).mp3",
+      "normalStart": 11.008,
+      "suppressedStart": 31.058,
+      "suppressedMode": "recorded",
+      "duration": 0.42,
+      "normalBytes": 7179,
+      "suppressedBytes": 7179,
+      "normalPeak": 1.383,
+      "normalRms": 0.596
+    },
+    "dbs": {
+      "source": "[Sound Dimension] Dbs Gun Shot Sound Effect ｜ Pubg Mobile Shotgun Sounds (BS8lOfXPC50).mp3",
+      "normalStart": 9.798,
+      "suppressedStart": 9.798,
+      "suppressedMode": "not_applicable",
+      "duration": 0.55,
+      "normalBytes": 8913,
+      "suppressedBytes": 8913,
+      "normalPeak": 1.301,
+      "normalRms": 0.362
+    },
+    "m249": {
+      "source": "[Sound Dimension] M249 Gun Firing Sound Effect ｜ Pubg Mobile Lmg Gun Sounds (IuGQjwuuWVs).mp3",
+      "normalStart": 9.458,
+      "suppressedStart": 9.458,
+      "suppressedMode": "not_applicable",
+      "duration": 0.5,
+      "normalBytes": 8278,
+      "suppressedBytes": 8278,
+      "normalPeak": 1.455,
+      "normalRms": 0.613
+    },
+    "mg3": {
+      "source": "[Sound Dimension] MG3 Gun Firing Sound Effect ｜ Pubg Mobile Lmg Gun Sounds (F1lNhUFDjys).mp3",
+      "normalStart": 12.718,
+      "suppressedStart": 12.718,
+      "suppressedMode": "not_applicable",
+      "duration": 0.37,
+      "normalBytes": 6448,
+      "suppressedBytes": 6448,
+      "normalPeak": 1.234,
+      "normalRms": 0.228
+    },
+    "dp28": {
+      "source": "[Sound Dimension] DP28 Gun Firing Sound Effect ｜ Pubg Mobile Lmg Gun Sounds (xo7NPZZR0m4).mp3",
+      "normalStart": 6.898,
+      "suppressedStart": 6.898,
+      "suppressedMode": "not_applicable",
+      "duration": 0.42,
+      "normalBytes": 7181,
+      "suppressedBytes": 7181,
+      "normalPeak": 0.315,
+      "normalRms": 0.085
+    },
+    "crossbow": {
+      "source": "[Sound Dimension] Crossbow Arrow Shot Sound Effect ｜ Pubg Mobile Sounds (SqfiWTZqNjI).mp3",
+      "normalStart": 0.398,
+      "suppressedStart": 0.398,
+      "suppressedMode": "not_applicable",
+      "duration": 0.22,
+      "normalBytes": 4251,
+      "suppressedBytes": 4251,
+      "normalPeak": 0.398,
+      "normalRms": 0.086
+    },
+    "p92": {
+      "source": "[Sound Dimension] P92 Shot Sound Effect ｜ Pubg Handgun Sounds (3h6F1_6DRq0).mp3",
+      "normalStart": 6.45,
+      "suppressedStart": 28.828,
+      "suppressedMode": "recorded",
+      "duration": 0.36,
+      "normalBytes": 6069,
+      "suppressedBytes": 6069,
+      "normalPeak": 1.032,
+      "normalRms": 0.17
+    },
+    "p18c": {
+      "source": "[Sound Dimension] P18c Shot Sound Effect ｜ Pubg Handgun Sounds (k5H4yWDTRrs).mp3",
+      "normalStart": 9.328,
+      "suppressedStart": 19.318,
+      "suppressedMode": "recorded",
+      "duration": 0.31,
+      "normalBytes": 5339,
+      "suppressedBytes": 5339,
+      "normalPeak": 0.349,
+      "normalRms": 0.088
+    },
+    "skorpion": {
+      "source": "[Sound Dimension] Skorpion Shot Sound Effect ｜ Pubg Handgun Sounds (uR9ngn4t3cM).mp3",
+      "normalStart": 6.99,
+      "suppressedStart": 34.47,
+      "suppressedMode": "recorded",
+      "duration": 0.32,
+      "normalBytes": 5709,
+      "suppressedBytes": 5709,
+      "normalPeak": 0.816,
+      "normalRms": 0.108
+    },
+    "deagle": {
+      "source": "[Sound Dimension] Desert Eagle Shot Sound Effect ｜ Pubg Handgun Sounds (EjyXlD166fM).mp3",
+      "normalStart": 0.188,
+      "suppressedStart": 0.188,
+      "suppressedMode": "not_applicable",
+      "duration": 0.45,
+      "normalBytes": 7541,
+      "suppressedBytes": 7541,
+      "normalPeak": 1.201,
+      "normalRms": 0.435
+    },
+    "p1911": {
+      "source": "[Sound Dimension] P1911 Shot Sound Effect ｜ Pubg Handgun Sounds (QJHOV4haUvc).mp3",
+      "normalStart": 8.598,
+      "suppressedStart": 26.868,
+      "suppressedMode": "recorded",
+      "duration": 0.36,
+      "normalBytes": 6071,
+      "suppressedBytes": 6071,
+      "normalPeak": 1.376,
+      "normalRms": 0.402
+    },
+    "r45": {
+      "source": "[Sound Dimension] R45 Shot Sound Effect ｜ Pubg Handgun Sounds (X0y6Cv3EBwQ).mp3",
+      "normalStart": 5.158,
+      "suppressedStart": 19.958,
+      "suppressedMode": "not_applicable",
+      "duration": 0.38,
+      "normalBytes": 6435,
+      "suppressedBytes": 6435,
+      "normalPeak": 1.381,
+      "normalRms": 0.456
+    },
+    "r1895": {
+      "source": "[Sound Dimension] R1895 Shot Sound Effect ｜ Pubg Handgun Sounds (lX7zmcYS-Qw).mp3",
+      "normalStart": 14.91,
+      "suppressedStart": 29.508,
+      "suppressedMode": "recorded",
+      "duration": 0.38,
+      "normalBytes": 6344,
+      "suppressedBytes": 6344,
+      "normalPeak": 0.334,
+      "normalRms": 0.047
+    },
+    "sawed-off": {
+      "source": "[Sound Dimension] Sawed Off Gun Shot Sound Effect ｜ Pubg Mobile Shotgun Sounds (PetPbjwqAaI).mp3",
+      "normalStart": 0.678,
+      "suppressedStart": 0.678,
+      "suppressedMode": "not_applicable",
+      "duration": 0.5,
+      "normalBytes": 8281,
+      "suppressedBytes": 8281,
+      "normalPeak": 0.264,
+      "normalRms": 0.092
+    },
+    "signal-flare": {
+      "source": "[Sound Dimension] Flare Gun Shot Sound Effect ｜ Pubg Mobile (Aqvs7p1xRtY).mp3",
+      "normalStart": 5.828,
+      "suppressedStart": 5.828,
+      "suppressedMode": "not_applicable",
+      "duration": 1.0,
+      "normalBytes": 15210,
+      "suppressedBytes": 15210,
+      "normalPeak": 1.395,
+      "normalRms": 0.412
+    },
+    "lynx-amr": {
+      "source": "[BaaGAshok YT] Amr Gun Sound Effect ll Battlegrounds Mobile India ll BaaGAshok YT (krlBQiIhg_U).mp3",
+      "normalStart": 3.708,
+      "suppressedStart": 3.708,
+      "suppressedMode": "not_applicable",
+      "duration": 0.78,
+      "normalBytes": 11941,
+      "suppressedBytes": 11941,
+      "normalPeak": 0.334,
+      "normalRms": 0.141,
+      "note": "isolated"
+    },
+    "js9": {
+      "source": "[Ömer Yusuf Özkayalı] PUBG JS9 sound (B_rrI15SLzk).mp3",
+      "normalStart": 2.698,
+      "suppressedStart": 2.698,
+      "suppressedMode": "derived",
+      "duration": 0.18,
+      "normalBytes": 3394,
+      "suppressedBytes": 3394,
+      "normalPeak": 0.644,
+      "normalRms": 0.118,
+      "note": "last shot of burst"
+    }
+  },
+  "effects": {
+    "frag-throw": {
+      "source": "[Sound Dimension] Frag Grenade Sound Effect ｜ Pubg Throwables Sounds (K4aUEqEFbxw).mp3",
+      "start": 0.378,
+      "duration": 1.1,
+      "bytes": 16589
+    },
+    "frag-explosion": {
+      "source": "[Sound Dimension] Frag Grenade Sound Effect ｜ Pubg Throwables Sounds (K4aUEqEFbxw).mp3",
+      "start": 2.198,
+      "duration": 1.7,
+      "bytes": 25001
+    },
+    "smoke-throw": {
+      "source": "[Sound Dimension] Smoke Grenade Sound Effect ｜ Pubg Throwables Sounds (7--nKvbnEgg).mp3",
+      "start": 0.478,
+      "duration": 1.1,
+      "bytes": 16683
+    },
+    "stun-throw": {
+      "source": "[Sound Dimension] Stun Grenade Sound Effect ｜ Pubg Throwables Sounds (TKilWS0V-jU).mp3",
+      "start": 0.628,
+      "duration": 1.0,
+      "bytes": 15219
+    },
+    "smoke-cloud": {
+      "source": "[Sound Dimension] Smoke Grenade Sound Effect ｜ Pubg Throwables Sounds (7--nKvbnEgg).mp3",
+      "start": 5.458,
+      "duration": 2.2,
+      "bytes": 32043
+    },
+    "stun-explosion": {
+      "source": "[Sound Dimension] Stun Grenade Sound Effect ｜ Pubg Throwables Sounds (TKilWS0V-jU).mp3",
+      "start": 5.098,
+      "duration": 1.4,
+      "bytes": 20705
+    },
+    "molotov-throw": {
+      "source": "[Sound Dimension] Molotov Cocktail Sound Effect ｜ Pubg Throwables Sounds (p5qhmL0FrDo).mp3",
+      "start": 11.478,
+      "duration": 1.3,
+      "bytes": 19246
+    },
+    "molotov-explosion": {
+      "source": "[Sound Dimension] Molotov Cocktail Sound Effect ｜ Pubg Throwables Sounds (p5qhmL0FrDo).mp3",
+      "start": 0.518,
+      "duration": 3.0,
+      "bytes": 43018
+    },
+    "flare-shot": {
+      "source": "[Sound Dimension] Flare Gun Shot Sound Effect ｜ Pubg Mobile (Aqvs7p1xRtY).mp3",
+      "start": 5.828,
+      "duration": 1.0,
+      "bytes": 15210
+    },
+    "first-aid-use": {
+      "source": "[Sound Dimension] First Aid Kit Healing Sound Effect ｜ Pubg Consumables Sounds (6pMdObBfITI).mp3",
+      "start": 0.678,
+      "duration": 4.3,
+      "bytes": 61309
+    },
+    "bandage-use": {
+      "source": "[Sound Dimension] Bandage Healing Sound Effect ｜ Pubg Consumables Sounds (BDXUXoZFOFY).mp3",
+      "start": 0.518,
+      "duration": 2.6,
+      "bytes": 37532
+    },
+    "painkiller-use": {
+      "source": "[Sound Dimension] Painkiller Sound Effect ｜ Pubg Consumables Sounds (rQw2Xkcr0a4).mp3",
+      "start": 0.408,
+      "duration": 3.5,
+      "bytes": 49961
+    },
+    "med-kit-use": {
+      "source": "[Sound Dimension] Med Kit Healing Sound Effect ｜ Pubg Consumables Sounds (aamQPCNZ7ok).mp3",
+      "start": 0.268,
+      "duration": 6.0,
+      "bytes": 85075
+    },
+    "energy-drink-use": {
+      "source": "[Sound Dimension] Energy Drink Sound Effect ｜ Pubg Consumables Sounds (Qq5b4r6StsM).mp3",
+      "start": 0.368,
+      "duration": 3.2,
+      "bytes": 45940
+    },
+    "adrenaline-use": {
+      "source": "[Sound Dimension] Adrenaline Syringe Sound Effect ｜ Pubg Consumables Sounds (IEfabMXiNM4).mp3",
+      "start": 0.368,
+      "duration": 4.1,
+      "bytes": 58288
+    }
+  },
+  "errors": {}
+}

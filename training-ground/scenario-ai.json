@@ -1,0 +1,26 @@
+{
+  "name": "Enemy AI smoke test",
+  "durationMs": 5000,
+  "stepMs": 50,
+  "size": 80,
+  "player": {
+    "x": 0,
+    "z": 0,
+    "hp": 100,
+    "weaponId": "legend-araya"
+  },
+  "enemies": [
+    {
+      "id": "ai-raider",
+      "kind": "raider",
+      "x": 0,
+      "z": 7,
+      "hp": 200,
+      "armor": 0.1,
+      "weaponId": "m416",
+      "ai": true,
+      "yaw": 3.141592653589793
+    }
+  ],
+  "actions": []
+}
