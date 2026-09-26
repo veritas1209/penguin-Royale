@@ -89,14 +89,18 @@ test('Arbiter freezes enemies in an 18 by 8 metre forward rectangle for five sec
  for(const enemy of [behind,outside,far])assert.equal(enemy.hp,1000);
  assert.equal(f.player.activeSkillReadyAt['legend-arbiter'],31000);
 });
-test('Araya melee hit has a fifty percent chance to reduce Issen cooldown by one second',()=>{
+test('Araya skill has an eight second cooldown and every melee hit reduces it by one second',()=>{
  const f=fixture('legend-araya');
- const enemy=f.enemy('target',0,2);
- f.player.activeSkillReadyAt['legend-araya']=10000;
+ f.raid.activeSkill(f.player,0,1,f.now);
+ assert.equal(f.player.activeSkillReadyAt['legend-araya'],9000);
+ const first=f.enemy('first',0,2);
+ const second=f.enemy('second',0,2,1);
  const original=Math.random;
  try{
-  Math.random=()=>0;
-  f.raid.legendaryMeleeHit(f.player,enemy,catalog.byId.get('legend-araya'));
+  Math.random=()=>.99;
+  f.raid.legendaryMeleeHit(f.player,first,catalog.byId.get('legend-araya'));
+  assert.equal(f.player.activeSkillReadyAt['legend-araya'],8000);
+  f.raid.legendaryMeleeHit(f.player,second,catalog.byId.get('legend-araya'));
  }finally{Math.random=original;}
- assert.equal(f.player.activeSkillReadyAt['legend-araya'],9000);
+ assert.equal(f.player.activeSkillReadyAt['legend-araya'],7000);
 });

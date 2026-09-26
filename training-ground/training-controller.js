@@ -8,7 +8,7 @@
   const weaponName = $("weapon-name");
   const weaponStats = $("weapon-stats");
   const weapons = [
-    {id:"legend-araya",name:"천살성도 - 아라야시키",damage:150,fireRate:2.25,range:5,color:"#edc65a",skill:"일섬",skillText:"최대 16m · 경로 적 30 피해/화상 · 마지막 적 뒤 추가 30 피해와 0.5초 공중 띄우기",cooldown:10000},
+    {id:"legend-araya",name:"천살성도 - 아라야시키",damage:150,fireRate:2.25,range:5,color:"#edc65a",skill:"일섬",skillText:"최대 16m · 경로 적 30 피해/화상 · 마지막 적 뒤 추가 30 피해와 0.5초 공중 띄우기",cooldown:8000},
     {id:"legend-thunder",name:"징벌자 선더클랩",damage:90,fireRate:1.5,range:5,color:"#8fd9ff",skill:"천벌",skillText:"가장 가까운 적 최대 5명 · 각 200 피해",cooldown:15000},
     {id:"legend-karambit",name:"태양의 불꽃 - 카람빗",damage:85,fireRate:3,range:5,color:"#ffad73",skill:"초가속",skillText:"5초간 공격속도 +200% (3배)",cooldown:30000},
     {id:"legend-arbiter",name:"어비터 아이스",damage:110,fireRate:1.5,range:5,color:"#b6eaff",skill:"빙결 폭풍",skillText:"전방 18m × 폭 8m 범위의 적에게 50 피해 · 이동과 공격 5초 정지",cooldown:30000}
@@ -196,7 +196,7 @@
         }
         e.burn++;
         const dealt=!e.immortal&&e.cap<=0?hurt(e,99999,w.color):hurt(e,w.damage,w.color);
-        if(dealt>0&&Math.random()<.5){
+        if(dealt>0){
           skillReadyAt.set(w.id,Math.max(now,(skillReadyAt.get(w.id)||now)-1000));
           log("아라야시키 · 일섬 재사용 1초 감소");
         }

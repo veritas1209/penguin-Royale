@@ -659,7 +659,7 @@ player.input={
     if(!weapon)throw gameError('NO_ACTIVE_SKILL','No legendary blade equipped');
     if(!Number.isFinite(aimX)||!Number.isFinite(aimZ))throw gameError('INVALID_AIM','Aim must be finite');
     if(player.arayaDash)return;
-    const cooldowns={'legend-araya':10000,'legend-thunder':15000,'legend-karambit':30000,'legend-arbiter':30000};
+    const cooldowns={'legend-araya':8000,'legend-thunder':15000,'legend-karambit':30000,'legend-arbiter':30000};
     const cooldown=cooldowns[weapon.id];
     if(!cooldown)throw gameError('NO_ACTIVE_SKILL','No active skill');
     if(now<(player.activeSkillReadyAt?.[weapon.id]??0))return;
@@ -1084,7 +1084,7 @@ player.input={
           player,
           enemy
         );
-        if(Math.random()<.5)player.activeSkillReadyAt['legend-araya']=Math.max(skillNow,(player.activeSkillReadyAt?.['legend-araya']??skillNow)-1000);
+        player.activeSkillReadyAt['legend-araya']=Math.max(skillNow,(player.activeSkillReadyAt?.['legend-araya']??skillNow)-1000);
 
         return;
       }
@@ -1128,7 +1128,7 @@ player.input={
         player,
         enemy
       );
-      if(Math.random()<.5)player.activeSkillReadyAt['legend-araya']=Math.max(skillNow,(player.activeSkillReadyAt?.['legend-araya']??skillNow)-1000);
+      player.activeSkillReadyAt['legend-araya']=Math.max(skillNow,(player.activeSkillReadyAt?.['legend-araya']??skillNow)-1000);
 
       return;
     }
