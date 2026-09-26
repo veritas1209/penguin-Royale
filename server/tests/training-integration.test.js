@@ -17,6 +17,8 @@ test('training uses the real Raid combat path while leaving persistent escrow al
  manager.startTraining(user);
  const raid=manager.trainingRaid(user.id),player=raid.players.get(user.id);
  assert.equal(raid.world.id,'warehouse-training');
+ assert.ok(raid.world.radiationZones[0]);
+ assert.ok(Math.hypot(raid.world.radiationZones[0].x,raid.world.radiationZones[0].z)>raid.world.size);
  assert.equal(raid.trainingAiActive,false);
  assert.equal(player.gear.primary,'m416-repaired');
  assert.equal(player.gear.melee,'legend-araya');

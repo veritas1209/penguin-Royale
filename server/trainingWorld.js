@@ -35,4 +35,4 @@ const enemySpawns=[
 ];
 export const TRAINING_WORLD={id:'warehouse-training',name:'창고 훈련장',size:82,
  spawn:{x:0,z:16},roads:[],buildings:[],terrain:[{id:'training-yard',kind:'yard',x:0,z:0,w:82,d:82}],
- landmarks:[],radiationZones:[],lootSpawns:[],enemySpawns,accessDoors:[],extractions:[],obstacles};
+ landmarks:[],radiationZones:[{id:'training-render-anchor',x:1000,z:1000,radius:0}],lootSpawns:[],enemySpawns,accessDoors:[],extractions:[],obstacles};
