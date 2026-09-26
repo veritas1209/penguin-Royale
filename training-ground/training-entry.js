@@ -56,7 +56,7 @@ async function startTraining(button,error){
   const data=await me.json(),state=await room.json();
   if(state.room?.status==='raid')throw Error('진행 중인 원정이 끝난 뒤 시작할 수 있습니다.');
   if(!['primary','secondary','pistol','melee'].some(slot=>data.profile?.equipped?.[slot]))throw Error('무기를 먼저 장착해 주세요.');
-  location.href=base+'/training.html?v=137';
+  location.href=base+'/training.html?v=138';
  }catch(e){
   button.disabled=false;
   button.innerHTML=label;

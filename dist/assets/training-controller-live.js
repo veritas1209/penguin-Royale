@@ -57,6 +57,7 @@
   };
   let view, enemies=[], selected=0, lastShot=0, time=0, lastFrame=0, lastSnapshot=0;
   let kills=0, damageDone=0, playerHp=100, running=true, ai=false, seq=0, firing=false;
+  let scopeHeld=false,legendaryShield=0,legendaryShieldDamagedAt=0;
   const AI_TICK=.1, AI_BUDGET_MS=1.25;
   let aiAccumulator=0,aiMs=0,aiPeakMs=0,aiChecks=0,aiTurn=0,frameMs=16.7,lastPerfAt=0,overview=false;
   const keys = new Set();
@@ -101,10 +102,11 @@
       players:[{id:"trainer",username:"훈련병",x:view.pred.x,z:view.pred.z,
         yaw:Math.atan2(view.aim.x,view.aim.z),hp:playerHp,maxHp:100,alive:playerHp>0,
         downed:false,boarded:false,weaponId:weapon().id,
+        legendaryShield,legendaryShieldMax:weapon().id.startsWith("legend-")?200:0,
         activeWeaponSlot:"melee",stamina:view.movement.state.stamina,
         maxStamina:view.movement.state.maxStamina,
         staminaRecoveryAt:view.movement.state.staminaRecoveryAt,
-        movement:{clientTime:now,serverTime:now,moveMultiplier:1}}],
+        movement:{clientTime:now,serverTime:now,moveMultiplier:weapon().id==="legend-karambit"?2:weapon().id.startsWith("legend-")?1.8:1}}],
       enemies:enemies.map((e)=>({id:e.id,name:e.name,kind:"raider",
         x:e.x,z:e.z,yaw:Math.atan2(view.pred.x-e.x,view.pred.z-e.z),
         hp:e.hp,maxHp:e.maxHp,alive:e.hp>0,weaponId:"akm",burning:e.burn>0,
@@ -131,7 +133,14 @@
   function select(index){
     cancelDashTarget();
     dashMotion=null;
+    scopeHeld=false;view.resetScope();
     selected=index;
+    const state=view.movement.state,previousMax=Math.max(1,state.maxStamina);
+    const maxStamina=weapon().id==="legend-karambit"?300:weapon().id.startsWith("legend-")?200:100;
+    state.stamina=Math.min(maxStamina,state.stamina/previousMax*maxStamina);
+    state.maxStamina=maxStamina;
+    state.moveMultiplier=weapon().id==="legend-karambit"?2:weapon().id.startsWith("legend-")?1.8:1;
+    legendaryShield=0;legendaryShieldDamagedAt=performance.now();
     view.setWeapon(weapon().id,weapon().modelFamily||"melee",weapon().attachments||{});
     weaponName.textContent=weapon().name;
     weaponStats.textContent="기본 공격 "+weapon().damage+" · 사거리 "+weapon().range+"m · 초당 "+weapon().fireRate+"회";
@@ -140,6 +149,21 @@
     document.querySelectorAll(".weapon").forEach((b,i)=>b.classList.toggle("active",i===selected));
     log("무기 장착: "+weapon().name);
     sync();
+  }
+  function setScopeHeld(held){
+    scopeHeld=held;
+    if(!held){view.resetScope();return;}
+    const w=weapon();
+    const scope=String(w.attachments?.scope||"").split("-").slice(0,2).join("-");
+    const kind=/^(red-dot|scope-(2x|3x|4x|6x|8x))$/.test(scope)?scope:"red-dot";
+    view.setScope(kind,true,w.aimTimeMultiplier||1);
+  }
+  function setTrainingActive(active){
+    ai=!!active;
+    $("ai-toggle").checked=ai;
+    const start=$("training-start");
+    if(start){start.textContent=ai?"훈련 일시 정지":"훈련 시작";start.setAttribute("aria-pressed",String(ai));}
+    if(liveTraining)status.textContent=ai?"훈련 중":"표적 대기 중";
   }
   function addArenaFloor(){
     const root=new H();
@@ -180,13 +204,14 @@
     view.directionAim(0,-1);
     kills=0;damageDone=0;playerHp=100;lastShot=0;time=0;running=true;aiAccumulator=0;aiMs=0;aiPeakMs=0;aiChecks=0;
     select(selected);
-    status.textContent=liveTraining?"훈련 중":"로컬 3D 훈련장 · 연결 없이 실행 중";
+    setTrainingActive(false);
+    if(!liveTraining)status.textContent="로컬 3D 훈련장 · 표적 대기 중";
     status.classList.remove("error");
     log("창고 맵 · 표적 "+count+"개와 무적 DPS 표적 배치 완료");
     updateSkillHud();
     updateDps(performance.now());
   }
-  function hurt(e,amount,kind,quiet=false){
+  function hurt(e,amount,kind,quiet=false,sourceId=weapon().id){
     if(e.hp<=0||amount<=0)return 0;
     if(e.immortal){
       const dealt=amount>=99999?weapon().damage:amount;
@@ -210,7 +235,10 @@
       view.burst(e.x,1.15,e.z,kind || weapon().color,9);
       log(e.name+" "+Math.round(dealt)+" 피해"+(e.hp<=0?" · 처치":""));
     }
-    if(before>0&&e.hp<=0)kills++;
+    if(before>0&&e.hp<=0){
+      kills++;
+      if(sourceId.startsWith("legend-"))playerHp=Math.min(100,playerHp+(sourceId==="legend-araya"?90:70));
+    }
     return dealt;
   }
   function fireTrainingGun(w,now){
@@ -252,9 +280,9 @@
       if(w.id==="legend-araya"){
         if(!e.immortal){
           e.cap=Math.max(0,e.cap-e.maxHp*.3);
-          e.hp=Math.min(e.hp,e.cap);
+          e.hp=e.cap<=0?Math.max(1,e.hp):Math.min(e.hp,e.cap);
         }
-        e.burn++;
+        e.burn++;e.burnOwner=w.id;
         const dealt=!e.immortal&&e.cap<=0?hurt(e,99999,w.color):hurt(e,w.damage,w.color);
         if(dealt>0){
           skillReadyAt.set(w.id,Math.max(now,(skillReadyAt.get(w.id)||now)-1000));
@@ -266,7 +294,13 @@
         hurt(e,w.damage,w.color);
         const chain=enemies.filter((t)=>t!==e&&t.hp>0&&Math.hypot(t.x-e.x,t.z-e.z)<=30)
           .sort((a,b)=>Math.hypot(a.x-e.x,a.z-e.z)-Math.hypot(b.x-e.x,b.z-e.z)).slice(0,2);
-        for(const t of chain)hurt(t,Math.round(w.damage*.45),w.color);
+        for(const t of chain)hurt(t,w.damage*(.5+Math.random()*.25),w.color);
+      }else if(w.id==="legend-karambit"){
+        hurt(e,w.damage*(e.bossId?2:1),w.color);
+        if(e.hp>0){
+          const previous=e.karambitBurn&&e.karambitBurn.expiresAt>now?e.karambitBurn:null;
+          e.karambitBurn={stacks:Math.min(3,(previous?.stacks||0)+1),expiresAt:now+4000,nextAt:previous?.nextAt||now+1000,ticksRemaining:4};
+        }
       }else hurt(e,w.damage,w.color);
     }
     sync();
@@ -416,7 +450,7 @@
       while(dash.nextHit<dash.targets.length){
         const target=dash.targets[dash.nextHit++];
         hurt(target,30,dash.color);
-        if(target.hp>0)target.burn++;
+        if(target.hp>0){target.burn++;target.burnOwner="legend-araya";}
       }
       view.burst(x,1.1,z,"#ffb5a5",30);
       view.burst(x,.45,z,"#ff405a",14);
@@ -683,11 +717,21 @@
     return activated;
   }
   function updateBurn(dt){
+    const now=performance.now();
     for(const e of enemies){
-      if(e.hp<=0||e.burn<=0)continue;
-      e.burnCarry+=e.burn*30*dt;
-      const amount=Math.floor(e.burnCarry);
-      if(amount>0){e.burnCarry-=amount;hurt(e,amount,"#ff7258",true);}
+      if(e.hp<=0)continue;
+      if(e.burn>0){
+        e.burnCarry+=e.burn*30*dt;
+        const amount=Math.floor(e.burnCarry);
+        if(amount>0){e.burnCarry-=amount;hurt(e,amount,"#ff7258",true,"legend-araya");}
+      }
+      const burn=e.karambitBurn;
+      if(!burn)continue;
+      while(e.hp>0&&burn.ticksRemaining>0&&burn.nextAt<=now&&burn.nextAt<=burn.expiresAt){
+        burn.ticksRemaining--;burn.nextAt+=1000;
+        hurt(e,50*burn.stacks,"#ffad73",true,"legend-karambit");
+      }
+      if(!burn.ticksRemaining||now>=burn.expiresAt)e.karambitBurn=null;
     }
   }
   function updateFreeze(now){
@@ -695,7 +739,7 @@
       if(e.hp<=0||!e.freezeNextAt)continue;
       while(e.hp>0&&e.freezeNextAt<=now&&e.freezeNextAt<=e.frozenUntil){
         e.freezeNextAt+=1000;
-        hurt(e,30,"#a6e9ff",true);
+        hurt(e,30,"#a6e9ff",true,"legend-arbiter");
       }
       if(now>=e.frozenUntil)e.freezeNextAt=0;
     }
@@ -769,7 +813,7 @@
   function updateLabels(){
     $("hp-number").textContent=Math.ceil(playerHp)+"/100";
     $("hp-fill").style.width=playerHp+"%";
-    $("stamina-fill").style.width=Math.max(0,view.movement.state.stamina)+"%";
+    $("stamina-fill").style.width=Math.max(0,Math.min(100,view.movement.state.stamina/Math.max(1,view.movement.state.maxStamina)*100))+"%";
     $("kills").textContent=String(kills);
     $("damage").textContent=String(Math.round(damageDone));
     $("targets").textContent=String(enemies.filter((e)=>e.hp>0&&!e.immortal).length);
@@ -830,13 +874,23 @@
       }
       if(los&&d<=10&&now-e.attackAt>1400){
         e.attackAt=now;
-        playerHp=Math.max(0,playerHp-3);
+        const absorbed=Math.min(legendaryShield,3);
+        legendaryShield-=absorbed;
+        playerHp=Math.max(0,playerHp-(3-absorbed));
+        legendaryShieldDamagedAt=now;
         view.reactHit("trainer");
         if(playerHp<=0){running=false;log("훈련 종료 · R 키로 재시작");}
       }
     }
     aiTurn=(aiTurn+1)%Math.max(1,active.length);
     aiMs=performance.now()-started;aiPeakMs=Math.max(aiPeakMs,aiMs);
+  }
+  function updateLegendaryEffects(now){
+    if(weapon().id.startsWith("legend-")&&now-legendaryShieldDamagedAt>=5000)legendaryShield=200;
+    const shieldBar=$("shield-fill"),shieldNumber=$("shield-number"),shieldRow=$("shield-row");
+    if(shieldRow)shieldRow.hidden=!weapon().id.startsWith("legend-");
+    if(shieldBar)shieldBar.style.width=Math.min(100,legendaryShield/2)+"%";
+    if(shieldNumber)shieldNumber.textContent=Math.ceil(legendaryShield)+"/200";
   }
   function updatePerformance(now){
     if(now-lastPerfAt<500)return;
@@ -848,6 +902,7 @@
   }
   function frame(now){
     requestAnimationFrame(frame);
+    if(lastFrame&&now-lastFrame<(ai?1000/60:1000/45)-1)return;
     try{
       const dt=Math.min(.05,(now-(lastFrame||now))/1000);
       lastFrame=now;
@@ -865,10 +920,14 @@
         updateAi(dt);
         updateBurn(dt);
         updateFreeze(now);
+        updateLegendaryEffects(now);
         time+=dt;
         if(now-lastSnapshot>120){lastSnapshot=now;sync();updateDps(now);}
       }else{view.moveX=0;view.moveZ=0;view.sprinting=false;}
+      const staminaBefore=view.movement.state.stamina;
       view.update(dt,dt);
+      const state=view.movement.state,staminaBoost=weapon().id==="legend-karambit"?3:weapon().id.startsWith("legend-")?2:1;
+      if(state.stamina>staminaBefore)state.stamina=Math.min(state.maxStamina,staminaBefore+(state.stamina-staminaBefore)*staminaBoost);
       for(const e of enemies){
         const actor=view.actorMap.get(e.id);
         if(actor&&e.airborneUntil>now){
@@ -885,16 +944,18 @@
   }
   try{
     view=new vg(canvas); Q=view;
+    view.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.25));
+    view.resize();
     reset();
     document.querySelectorAll(".weapon").forEach((b,i)=>b.addEventListener("click",()=>select(i)));
-    if(liveTraining){ai=true;$("ai-toggle").checked=true;}
+    $("training-start").addEventListener("click",()=>setTrainingActive(!ai));
     $("reset").addEventListener("click",reset);
     $("map-overview").addEventListener("click",toggleOverview);
     $("attack").addEventListener("click",strike);
     $("skill-button").addEventListener("click",()=>{
       if(!["legend-araya","legend-arbiter"].includes(weapon().id))useSkill();
     });
-    $("ai-toggle").addEventListener("change",(e)=>{ai=e.target.checked;log(ai?"적 AI 시험 켜짐":"적 AI 시험 꺼짐");});
+    $("ai-toggle").addEventListener("change",(e)=>{setTrainingActive(e.target.checked);log(ai?"적 AI 시험 켜짐":"적 AI 시험 꺼짐");});
     $("ai-count").addEventListener("change",reset);
     $("ai-mode").addEventListener("change",()=>log("AI 시험: "+$("ai-mode").selectedOptions[0].textContent));
     window.addEventListener("keydown",(e)=>{
@@ -916,8 +977,8 @@
       keys.delete(k);
       if(k==="q"&&dashTargeting)releaseDashTarget();
     });
-    window.addEventListener("blur",()=>{keys.clear();firing=false;cancelDashTarget();});
-    window.addEventListener("pointerup",()=>{firing=false;});
+    window.addEventListener("blur",()=>{keys.clear();firing=false;setScopeHeld(false);cancelDashTarget();});
+    window.addEventListener("pointerup",(e)=>{if(e.button===2)setScopeHeld(false);else firing=false;});
     window.addEventListener("pointermove",(e)=>{
       if(e.pointerType==="touch")return;
       const reticle=$("reticle");
@@ -928,14 +989,20 @@
     });
     canvas.addEventListener("pointermove",(e)=>view.pointerAim(e.clientX,e.clientY));
     canvas.addEventListener("pointerdown",(e)=>{
+      if(e.button===2){
+        e.preventDefault();
+        if(dashTargeting)cancelDashTarget();
+        else setScopeHeld(true);
+        return;
+      }
       if(e.button!==0)return;
       if(!dashTargeting){firing=true;strike();}
     });
-    canvas.addEventListener("contextmenu",(e)=>{e.preventDefault();if(dashTargeting)cancelDashTarget();});
+    canvas.addEventListener("contextmenu",(e)=>e.preventDefault());
     window.__TRAINING__={get view(){return view;},get enemies(){return enemies;},
       get state(){return {weapon:weapon().id,position:{x:view.pred.x,z:view.pred.z},
         hp:playerHp,kills,damageDone,targets:enemies.filter((e)=>e.hp>0&&!e.immortal).length,dpsNow,dpsPeak,dpsTotal,
-        drawCalls:view.renderer.info.render.calls,aiMs,aiPeakMs,frameMs,aiChecks,overview,skillReadyIn:Math.max(0,(skillReadyAt.get(weapon().id)||0)-performance.now()),
+        drawCalls:view.renderer.info.render.calls,aiMs,aiPeakMs,frameMs,aiChecks,overview,ai,scopeHeld,scopeZoom:view.scopeZoom,legendaryShield,maxStamina:view.movement.state.maxStamina,moveMultiplier:view.movement.state.moveMultiplier,skillReadyIn:Math.max(0,(skillReadyAt.get(weapon().id)||0)-performance.now()),
         karambitBuff:Math.max(0,karambitBuffUntil-performance.now()),
         frozen:enemies.filter(e=>e.frozenUntil>performance.now()).map(e=>e.id),
         dashTargeting,dashTravel:dashPreviewTravel,dashMoving:!!dashMotion,

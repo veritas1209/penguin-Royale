@@ -29,7 +29,7 @@ shell=shell.replace('</style>', '''
 .panel>.section,.panel>.note{display:none!important}.panel{height:auto!important;bottom:auto!important;max-height:none!important}
 #live-controls{display:grid;gap:15px}#live-controls h2{margin:0;font-size:18px;color:#ffdc91}
 #live-controls .row{display:grid;gap:8px}#live-controls select,#live-controls button{width:100%;padding:11px;background:#253f42;color:#f2e9cf;border:1px solid #739088;border-radius:4px;font-size:14px}
-#live-controls button{cursor:pointer;background:#d5a954;color:#1d3534;font-weight:bold}
+#live-controls button{cursor:pointer;background:#d5a954;color:#1d3534;font-weight:bold}#live-controls #reset{background:#253f42;color:#f2e9cf}
 .live-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.live-panel-head h2{margin:0}.training-exit{display:block;padding:7px 9px;color:#eacb7b;border:1px solid #7b9386;text-decoration:none;font-size:12px;font-weight:700}.training-exit:hover,.training-exit:focus-visible{background:#35534b;color:#fff2ca}
 </style>''')
 bootstrap='''<script>window.__peAudio={gunshot:()=>{}};</script>
@@ -51,14 +51,13 @@ bootstrap='''<script>window.__peAudio={gunshot:()=>{}};</script>
    return {id:def.id,name:def.name,damage:Number(def.damage)||8,fireRate:Number(def.fireRate)||1.5,
     range:Number(def.range)||5,color:def.mode==='melee'?'#edc65a':'#f9d795',mode:def.mode||'semi',
     modelFamily:def.mode==='melee'?'melee':families[def.family]||String(def.family||'pistol').toLowerCase(),
-    attachments,suppressed:/suppress|silenc|소음/i.test(String(attachments.barrel||'')),
-    skill:'',skillText:'',cooldown:0};
+    attachments,suppressed:/suppress|silenc|소음/i.test(String(attachments.barrel||''))};
   }).filter(Boolean);
   if(!weapons.length)throw new Error('은신처에서 무기를 먼저 장착해 주세요.');
   window.__LIVE_TRAINING__={weapons,username:me.user?.username||''};
   const controls=document.getElementById('live-controls');
-  controls.append(document.getElementById('ai-mode').closest('label'),document.getElementById('reset'));
-  const script=document.createElement('script');script.src='assets/training-controller-live.js?v=137';document.body.append(script);
+  controls.append(document.getElementById('training-start'),document.getElementById('ai-mode').closest('label'),document.getElementById('reset'));
+  const script=document.createElement('script');script.src='assets/training-controller-live.js?v=138';document.body.append(script);
  }catch(error){const status=document.getElementById('status');status.textContent=String(error.message||error);status.classList.add('error');}
 })();
 </script>'''
