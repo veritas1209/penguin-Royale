@@ -13,7 +13,7 @@
     "server/enemyStamina.js": "90269298033f1a65c921d0c260416fc59dbaf75c03b1166ba322ab012500b5e3",
     "server/extractionRules.js": "890390cccb6c11a33189cc2226b3dcb43998efbe7cb2731603ddbd541f9cf60b",
     "server/firearmSound.js": "07587f5e4670a99dddb5dd1510a7c909bf25f2a7b54a97cf1629549f1278075b",
-    "server/game.js": "54963584c2639804b94d38309f671ea77d4d90fb0306c785f8415592bb97e670",
+    "server/game.js": "c5d5772d7380d209cf19014375429296b942fd7069301430bcc9340346550590",
     "server/goldenBoss.js": "11d92e7247b6e842ccec6b57e64260fc52bf499ce13018650f59eb1bc4f3162b",
     "server/inventoryActions.js": "f730330131496c6e5c77c38b1699faf1eed4aa264d7c752a715c8b8dba4995c0",
     "server/loot.js": "66f8f834baea51b6c803ec99dd18ad5fc88054b249354edf56ca08dacaedd639",

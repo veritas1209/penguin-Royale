@@ -666,10 +666,10 @@ player.input={
     const direction=normalize(aimX,aimZ);
     if(weapon.id==='legend-araya'){
       let travel=16;
-      const riverFences=this.world.obstacles.filter(o=>o.id?.startsWith('river-fence-'));
+      const waterBarriers=this.world.obstacles.filter(o=>o.id?.startsWith('river-fence-')||o.kind==='water-blocker'||o.kind==='shore-rail');
       for(let step=.1;step<=16.001;step+=.1){
         const x=player.x+direction.x*step,z=player.z+direction.z*step;
-        const fenceHit=riverFences.some(o=>Math.abs(x-o.x)<=(o.w??1)/2+.45&&Math.abs(z-o.z)<=(o.d??1)/2+.45);
+        const fenceHit=waterBarriers.some(o=>Math.abs(x-o.x)<=(o.w??1)/2+.45&&Math.abs(z-o.z)<=(o.d??1)/2+.45);
         if(Math.abs(x)>this.world.size/2-.5||Math.abs(z)>this.world.size/2-.5||fenceHit||riverBlocked(this.world,x,z)){
           travel=step-.1;break;
         }
@@ -714,14 +714,17 @@ player.input={
         if(enemy.hp<=0||isVirtualResponseEnemy(enemy))return false;
         const dx=enemy.x-player.x,dz=enemy.z-player.z;
         const along=dx*direction.x+dz*direction.z;
-        return along>=0&&along<=18&&Math.abs(dx*direction.z-dz*direction.x)<=4;
+        return along>=0&&along<=30&&Math.abs(dx*direction.z-dz*direction.x)<=8;
       });
       this.event('active_skill',{playerId:player.id,weaponId:weapon.id,startedAt:now,x:player.x,z:player.z,
-        aimX:direction.x,aimZ:direction.z,length:18,width:8,
+        aimX:direction.x,aimZ:direction.z,length:30,width:16,
         targets:targets.map(enemy=>({id:enemy.id,x:enemy.x,z:enemy.z}))});
       for(const enemy of targets){
         this.damageEnemy(player,enemy,50,weapon.id);
-        if(enemy.hp>0)enemy.stunnedUntil=Math.max(enemy.stunnedUntil??0,now+5000);
+        if(enemy.hp>0){
+          enemy.stunnedUntil=Math.max(enemy.stunnedUntil??0,now+10000);
+          enemy.arbiterFreeze={ownerId:player.id,nextAt:now+1000,expiresAt:now+10000,ticksRemaining:10};
+        }
       }
     }
     player.activeSkillReadyAt??={};
@@ -973,23 +976,17 @@ player.input={
     const baseDamage=weapon.damage??35;
 
     if(id==='legend-arbiter'){
-      const proc=player.arbiterPrimed||Math.random()<.25;
-      if(player.arbiterPrimed)player.arbiterPrimed=false;
-      const damage=proc?99999:baseDamage;
-
-      this.damageEnemy(player,enemy,damage,id);
-
+      player.arbiterPrimed=false;
+      const proc=(enemy.arbiterFreeze?.expiresAt??0)>this.now();
+      this.damageEnemy(player,enemy,proc?99999:baseDamage,id);
       this.healLegendKill68(player,enemy,id);
-
-      if(proc){
-        this.event('legendary_arbiter_proc',{
-          playerId:player.id,
-          enemyId:enemy.id,
-          x:enemy.x,
-          z:enemy.z,
-          damage:99999
-        });
-      }
+      if(proc)this.event('legendary_arbiter_proc',{
+        playerId:player.id,
+        enemyId:enemy.id,
+        x:enemy.x,
+        z:enemy.z,
+        damage:99999
+      });
       return;
     }
 
@@ -2096,6 +2093,19 @@ player.input={
         }
       }
 
+      if(enemy.hp<=0)continue;
+
+      const arbiterFreeze=enemy.arbiterFreeze;
+      if(arbiterFreeze){
+        const owner=this.players.get(arbiterFreeze.ownerId)??null;
+        while(enemy.hp>0&&arbiterFreeze.ticksRemaining>0&&arbiterFreeze.nextAt<=now&&arbiterFreeze.nextAt<=arbiterFreeze.expiresAt){
+          arbiterFreeze.nextAt+=1000;
+          arbiterFreeze.ticksRemaining--;
+          this.damageEnemy(owner,enemy,30,'arbiter-freeze',1);
+          this.healLegendKill68(owner,enemy,'legend-arbiter');
+        }
+        if(arbiterFreeze.ticksRemaining<=0||now>=arbiterFreeze.expiresAt)delete enemy.arbiterFreeze;
+      }
       if(enemy.hp<=0)continue;
 
       /* BC103 KARAMBIT BURN

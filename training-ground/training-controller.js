@@ -11,7 +11,7 @@
     {id:"legend-araya",name:"천살성도 - 아라야시키",damage:150,fireRate:2.25,range:5,color:"#edc65a",skill:"일섬",skillText:"최대 16m · 경로 적 30 피해/화상 · 마지막 적 뒤 추가 30 피해와 0.5초 공중 띄우기",cooldown:8000},
     {id:"legend-thunder",name:"징벌자 선더클랩",damage:90,fireRate:1.5,range:5,color:"#8fd9ff",skill:"천벌",skillText:"가장 가까운 적 최대 5명 · 각 200 피해",cooldown:15000},
     {id:"legend-karambit",name:"태양의 불꽃 - 카람빗",damage:85,fireRate:3,range:5,color:"#ffad73",skill:"초가속",skillText:"5초간 공격속도 +200% (3배)",cooldown:30000},
-    {id:"legend-arbiter",name:"어비터 아이스",damage:110,fireRate:1.5,range:5,color:"#b6eaff",skill:"빙결 폭풍",skillText:"전방 18m × 폭 8m 범위의 적에게 50 피해 · 이동과 공격 5초 정지",cooldown:30000}
+    {id:"legend-arbiter",name:"어비터 아이스",damage:110,fireRate:1.5,range:5,color:"#b6eaff",skill:"빙결 폭풍",skillText:"전방 30m × 폭 16m 범위의 적에게 50 피해 · 이동과 공격 10초 정지 · 초당 빙결 피해 30",cooldown:30000}
   ];
   const starts = [
     {id:"front",name:"정면 표적",x:0,z:2,hp:480},
@@ -120,7 +120,7 @@
     cancelDashTarget();
     dashMotion=null;
     view.start(world,"trainer");
-    enemies=starts.map((e)=>({...e,maxHp:e.hp,cap:e.hp,burn:0,burnCarry:0,attackAt:0,frozenUntil:0}));
+    enemies=starts.map((e)=>({...e,maxHp:e.hp,cap:e.hp,burn:0,burnCarry:0,attackAt:0,frozenUntil:0,arbiterFrozenUntil:0,freezeNextAt:0}));
     skillReadyAt.clear();karambitBuffUntil=0;
     dpsEvents=[];dpsTotal=0;dpsPeak=0;dpsNow=0;dpsStartedAt=0;
     for(const visual of skillVisuals){visual.mesh.removeFromParent();visual.mesh.geometry.dispose();visual.mesh.material.dispose();}
@@ -201,7 +201,7 @@
           log("아라야시키 · 일섬 재사용 1초 감소");
         }
       }else if(w.id==="legend-arbiter"){
-        hurt(e,Math.random()<.25?99999:w.damage,w.color);
+        hurt(e,e.arbiterFrozenUntil>now?99999:w.damage,w.color);
       }else if(w.id==="legend-thunder"){
         hurt(e,w.damage,w.color);
         const chain=enemies.filter((t)=>t!==e&&t.hp>0&&Math.hypot(t.x-e.x,t.z-e.z)<=30)
@@ -410,7 +410,7 @@
     if(remaining>0){log(w.skill+" 재사용까지 "+(remaining/1000).toFixed(1)+"초");return false;}
     if(!dashTargeting){
       dashTargeting=true;
-      dashPreview=w.id==="legend-arbiter"?makeDashPreview(18,4):makeDashPreview();
+      dashPreview=w.id==="legend-arbiter"?makeDashPreview(30,8):makeDashPreview();
       log(w.skill+" 조준 시작");
     }
     updateDashPreview();
@@ -572,7 +572,7 @@
   function arbiterSkill(){
     const now=performance.now(),px=view.pred.x,pz=view.pred.z;
     const unit=Math.hypot(view.aim.x,view.aim.z)||1,ax=view.aim.x/unit,az=view.aim.z/unit;
-    const length=18,halfWidth=4,sideX=-az,sideZ=ax;
+    const length=30,halfWidth=8,sideX=-az,sideZ=ax;
     playSkillSound(arbiterSound);
     iceStorm(px,pz,ax,az,now);
     view.burst(px,.7,pz,"#d9f7ff",24);
@@ -584,9 +584,11 @@
     for(const e of targets){
       hurt(e,50,"#a3eaff");
       if(e.hp<=0)continue;
-      e.frozenUntil=now+5000;
-      iceRing(e.x,e.z,1.3,"#a6e9ff",5000,{persistent:true,opacity:.8,thickness:.12});
-      iceRing(e.x,e.z,.85,"#e8fbff",5000,{persistent:true,opacity:.58,thickness:.035});
+      e.frozenUntil=now+10000;
+      e.arbiterFrozenUntil=e.frozenUntil;
+      e.freezeNextAt=now+1000;
+      iceRing(e.x,e.z,1.3,"#a6e9ff",10000,{persistent:true,opacity:.8,thickness:.12});
+      iceRing(e.x,e.z,.85,"#e8fbff",10000,{persistent:true,opacity:.58,thickness:.035});
       for(let i=0;i<6;i++){
         const angle=i*Math.PI/3,dx=Math.cos(angle)*.8,dz=Math.sin(angle)*.8;
         skillBeam(new V(e.x+dx,.13,e.z+dz),new V(e.x+dx*.75,1.3+(i%2)*.4,e.z+dz*.75),
@@ -594,7 +596,7 @@
       }
       view.burst(e.x,.85,e.z,"#a6eaff",18);
     }
-    log("빙결 폭풍 · "+targets.length+"명에게 50 피해와 5초 빙결");
+    log("빙결 폭풍 · "+targets.length+"명에게 50 피해와 10초 빙결 · 초당 30 피해");
     return true;
   }
   function useSkill(commitDash=false){
@@ -626,6 +628,16 @@
       e.burnCarry+=e.burn*30*dt;
       const amount=Math.floor(e.burnCarry);
       if(amount>0){e.burnCarry-=amount;hurt(e,amount,"#ff7258",true);}
+    }
+  }
+  function updateFreeze(now){
+    for(const e of enemies){
+      if(e.hp<=0||!e.freezeNextAt)continue;
+      while(e.hp>0&&e.freezeNextAt<=now&&e.freezeNextAt<=e.frozenUntil){
+        e.freezeNextAt+=1000;
+        hurt(e,30,"#a6e9ff",true);
+      }
+      if(now>=e.frozenUntil)e.freezeNextAt=0;
     }
   }
   function updateSkillHud(){
@@ -702,6 +714,7 @@
         updateDashMotion(now);
         updateAi(dt);
         updateBurn(dt);
+        updateFreeze(now);
         time+=dt;
         if(now-lastSnapshot>120){lastSnapshot=now;sync();}
       }else{view.moveX=0;view.moveZ=0;view.sprinting=false;}

@@ -48,6 +48,16 @@ test('Issen stops before the riverside fence instead of crossing into water',()=
  assert.equal(f.player.arayaDash,null);
 });
 
+test('Issen stops before sea and lake barriers',()=>{
+ for(const kind of ['water-blocker','shore-rail']){
+  const f=fixture('legend-araya',[{id:kind+'-test',kind,x:0,z:5,w:8,d:.5}]);
+  f.raid.activeSkill(f.player,0,1,f.now);
+  assert.ok(f.player.arayaDash.travel>3);
+  assert.ok(f.player.arayaDash.travel<4.4);
+  f.now=1500;f.raid.updateArayaDash(f.player,f.now);
+  assert.ok(f.player.z<4.4);
+ }
+});
 test('Issen hits every path target, burns, and strikes/stuns the last one',()=>{
  const f=fixture('legend-araya',[{x:0,z:7,w:8,d:1}]);
  const first=f.enemy('one',0,4),last=f.enemy('two',0,9);last.stunnedUntil=0;
@@ -78,16 +88,44 @@ test('Karambit triples server melee cadence for five seconds',()=>{
  f.raid.fire(f.player,'melee',0,1,f.now+50);
  assert.equal(f.raid.enemies.get('target').hp,hp);
 });
-test('Arbiter freezes enemies in an 18 by 8 metre forward rectangle for five seconds',()=>{
+test('Arbiter freezes enemies in a 30 by 16 metre rectangle for ten seconds and deals thirty damage each second',()=>{
  const f=fixture('legend-arbiter');
- const front=f.enemy('front',0,5),edge=f.enemy('edge',3.9,10);
- const behind=f.enemy('behind',0,-1),outside=f.enemy('outside',4.1,10),far=f.enemy('far',0,18.1);
+ const front=f.enemy('front',0,5),edge=f.enemy('edge',7.9,20);
+ const behind=f.enemy('behind',0,-1),outside=f.enemy('outside',8.1,20),far=f.enemy('far',0,30.1);
  for(const enemy of [front,edge,behind,outside,far])enemy.stunnedUntil=0;
  f.raid.activeSkill(f.player,0,1,f.now);
  assert.equal(front.hp,950);assert.equal(edge.hp,950);
- assert.equal(front.stunnedUntil,6000);assert.equal(edge.stunnedUntil,6000);
+ const cast=f.events.find(event=>event.kind==='active_skill'&&event.data?.weaponId==='legend-arbiter');
+ assert.equal(cast?.data?.length,30);assert.equal(cast?.data?.width,16);
+ assert.equal(front.stunnedUntil,11000);assert.equal(edge.stunnedUntil,11000);
+ for(const enemy of [behind,outside,far])assert.equal(enemy.hp,1000);
+ f.now=1999;f.raid.updateAreas(f.now);assert.equal(front.hp,950);
+ f.now=2000;f.raid.updateAreas(f.now);assert.equal(front.hp,920);
+ f.now=11000;f.raid.updateAreas(f.now);assert.equal(front.hp,650);assert.equal(edge.hp,650);
+ assert.equal(front.arbiterFreeze,undefined);
+ f.now=12000;f.raid.updateAreas(f.now);assert.equal(front.hp,650);
  for(const enemy of [behind,outside,far])assert.equal(enemy.hp,1000);
  assert.equal(f.player.activeSkillReadyAt['legend-arbiter'],31000);
+});
+test('Arbiter melee executes only enemies currently frozen by its skill',()=>{
+ const original=Math.random;Math.random=()=>.99;
+ try{
+  const plain=fixture('legend-arbiter'),unfrozen=plain.enemy('plain',0,2);
+  plain.raid.legendaryMeleeHit(plain.player,unfrozen,catalog.byId.get('legend-arbiter'));
+  assert.equal(unfrozen.hp,890);
+  assert.equal(plain.events.filter(event=>event.kind==='legendary_arbiter_proc').length,0);
+  const frozen=fixture('legend-arbiter'),target=frozen.enemy('target',0,2);
+  frozen.raid.activeSkill(frozen.player,0,1,frozen.now);
+  frozen.raid.legendaryMeleeHit(frozen.player,target,catalog.byId.get('legend-arbiter'));
+  assert.equal(frozen.raid.enemies.has('target'),false);
+  assert.equal(frozen.events.filter(event=>event.kind==='legendary_arbiter_proc').length,1);
+  const expired=fixture('legend-arbiter'),thawed=expired.enemy('thawed',0,2);
+  expired.raid.activeSkill(expired.player,0,1,expired.now);
+  expired.now=11000;
+  expired.raid.legendaryMeleeHit(expired.player,thawed,catalog.byId.get('legend-arbiter'));
+  assert.equal(thawed.hp,840);
+  assert.equal(expired.events.filter(event=>event.kind==='legendary_arbiter_proc').length,0);
+ }finally{Math.random=original;}
 });
 test('Araya skill has an eight second cooldown and every melee hit reduces it by one second',()=>{
  const f=fixture('legend-araya');

@@ -1,3 +1,4 @@
+import {coastalNuclearWorld,styleCoastalBuildings} from './coastalNuclearWorld.js';
 import { buildingWallObstacles } from './collision.ts';
 
 export interface WorldObstacle {id:string;x:number;z:number;w:number;d:number;h:number;kind:string;rotation:number;color?:string;bulletPassable?:boolean;}
@@ -4761,7 +4762,7 @@ function __bcNatureWorld122(e){
  return e;
 }
 
-__bcMapUpdate107(WORLD);__bcNatureWorld122(WORLD);
+__bcMapUpdate107(WORLD);__bcNatureWorld122(WORLD);coastalNuclearWorld(WORLD);
 
 const ENTERABLE_KINDS=new Set<WorldBuildingKind>(['hut','armory','generator','office','support-center','barracks','hydro','market','workshop','bunker']);
 const buildingSources=WORLD.obstacles.filter((o):o is WorldObstacle&{kind:WorldBuildingKind}=>ENTERABLE_KINDS.has(o.kind as WorldBuildingKind));
@@ -4775,7 +4776,7 @@ const ENTERABLE_BUILDINGS:WorldBuilding[]=buildingSources.map((o,index)=>{const 
 const enterableIds=new Set(buildingSources.map(o=>o.id));
 WORLD.obstacles=WORLD.obstacles.filter(o=>!enterableIds.has(o.id));
 WORLD.obstacles.push(...ENTERABLE_BUILDINGS.flatMap(buildingWallObstacles));
-WORLD.buildings=ENTERABLE_BUILDINGS;
+WORLD.buildings=ENTERABLE_BUILDINGS;styleCoastalBuildings(WORLD);
 for(const b of ENTERABLE_BUILDINGS){
  const p=palette[b.sourceKind],inset=1.35,lateral=Math.min(1.15,(b.door.side==='north'||b.door.side==='south'?b.w:b.d)*.14);
  let x=b.x,z=b.z;

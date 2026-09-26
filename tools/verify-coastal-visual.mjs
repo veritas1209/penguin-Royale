@@ -1,0 +1,11 @@
+import * as T from 'three';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+import {WORLD} from '../shared/world.ts';
+const mesh=(g,color,x,y,z,geo)=>{const m=new T.Mesh(geo,new T.MeshStandardMaterial({color}));m.position.set(x,y,z);g.add(m);return m;};
+const q=(g,c,x,y,z,w,h,d)=>mesh(g,c,x,y,z,new T.BoxGeometry(w,h,d));
+const gh=(g,c,x,y,z,w,h,d)=>{const m=mesh(g,c,x,y,z,new T.SphereGeometry(1,12,8));m.scale.set(w,h,d);return m;};
+const _h=(g,c,x,y,z,r,h)=>mesh(g,c,x,y,z,new T.CylinderGeometry(r,r,h,20));
+const {__bcCoastalVisuals129:create}=await import('../src/coastalNuclearVisuals.js');
+const art=create(WORLD);art.update(0);art.update(21);let meshes=0;art.root.traverse(o=>{if(!o.isMesh)return;meshes++;const p=o.geometry.attributes.position;for(let i=0;i<p.array.length;i++)assert.ok(Number.isFinite(p.array[i]));});assert.ok(meshes>500);assert.ok(art.roofs.length>=14);console.log({meshes,fadeableRoofs:art.roofs.length});
