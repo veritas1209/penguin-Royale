@@ -1,3 +1,4 @@
+import {improveWorldQuality} from './worldQuality.js';
 import {coastalNuclearWorld,styleCoastalBuildings} from './coastalNuclearWorld.js';
 import { buildingWallObstacles } from './collision.ts';
 
@@ -4826,3 +4827,5 @@ for(const [id,x,z] of [['market-cache-0',-174,-195],['fishing-cache-3',-132,157]
 }
 const hydroInteriorCache=WORLD.lootSpawns.find(spawn=>spawn.id==='hydro-cache-2');
 if(hydroInteriorCache)hydroInteriorCache.buildingId='hydro-building-2';
+
+improveWorldQuality(WORLD,buildingWallObstacles);

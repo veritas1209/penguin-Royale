@@ -23,4 +23,6 @@ for(const mesh of art.root.children.filter(o=>o.material?.uniforms)){
  else{assert.ok(maxX>=300&&minZ<=-300);}
 }
 assert.equal(art.roofs.filter(({b})=>b.id.startsWith('hydro-')).length,6);
+const accessPaths=art.root.getObjectByName('district-access-paths-134');
+assert.ok(accessPaths);assert.equal(accessPaths.geometry.attributes.color.itemSize,4);assert.equal(accessPaths.geometry.attributes.position.count,WORLD.mapQuality.paths.length*18);assert.equal(accessPaths.material.transparent,true);assert.equal(accessPaths.material.depthWrite,false);
 art.dispose();

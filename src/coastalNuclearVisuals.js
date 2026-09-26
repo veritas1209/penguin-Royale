@@ -1,3 +1,4 @@
+import {addWorldAccessPaths} from './worldQualityVisuals.js';
 import {Group as H,BufferGeometry as oo,PlaneGeometry as Zc,ShaderMaterial as ul,Mesh as U,MeshStandardMaterial as fl} from 'three';
 import {BoxGeometry,SphereGeometry,CylinderGeometry} from 'three';
 const put=(g,c,x,y,z,geo)=>{const m=new U(geo,new fl({color:c,roughness:.85}));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;g.add(m);return m;};
@@ -78,5 +79,5 @@ float phase=distance*.92+sin(p.y*.23+time*.2)*.45+sin(p.y*.67)*.15+time*.95;floa
   for(let x=-2;x<=2;x+=.4)for(let z=1;z<2;z+=.4)q(g,'#748477',x,1.3,z,.025,.6,.025);
   for(const x of [-2,2])q(g,'#705b40',x,.7,1.5,.13,1.4,.13);root.add(g);
  }
- root.add(mg(solid));return{root,roofs,dispose(){for(const m of materials)m.dispose();for(const {puff} of steam)puff.material.dispose();},update(t){for(const m of materials)if(m.uniforms)m.uniforms.time.value=t;for(const {puff,o,k}of steam){const phase=(t*.13+k/9)%1;puff.position.set(o.x+phase*4+Math.sin(k+t*.2),o.h+1+phase*15,o.z+phase*1.5);puff.scale.set(2+phase*4,1.4+phase*2,2+phase*4);puff.material.opacity=.15*Math.sin(phase*Math.PI);}}};
+ addWorldAccessPaths(root,world,oo,Attribute,U,fl);root.add(mg(solid));return{root,roofs,dispose(){for(const m of materials)m.dispose();for(const {puff} of steam)puff.material.dispose();},update(t){for(const m of materials)if(m.uniforms)m.uniforms.time.value=t;for(const {puff,o,k}of steam){const phase=(t*.13+k/9)%1;puff.position.set(o.x+phase*4+Math.sin(k+t*.2),o.h+1+phase*15,o.z+phase*1.5);puff.scale.set(2+phase*4,1.4+phase*2,2+phase*4);puff.material.opacity=.15*Math.sin(phase*Math.PI);}}};
 }
