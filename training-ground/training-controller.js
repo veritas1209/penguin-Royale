@@ -7,34 +7,58 @@
   const logBox = $("event-log");
   const weaponName = $("weapon-name");
   const weaponStats = $("weapon-stats");
-  const weapons = [
+  const liveTraining = window.__LIVE_TRAINING__ || null;
+  const defaultWeapons = [
     {id:"legend-araya",name:"천살성도 - 아라야시키",damage:150,fireRate:2.25,range:5,color:"#edc65a",skill:"일섬",skillText:"최대 16m · 경로 적 30 피해/화상 · 마지막 적 뒤 추가 30 피해와 0.5초 공중 띄우기",cooldown:8000},
     {id:"legend-thunder",name:"징벌자 선더클랩",damage:90,fireRate:1.5,range:5,color:"#8fd9ff",skill:"천벌",skillText:"가장 가까운 적 최대 5명 · 각 200 피해",cooldown:15000},
     {id:"legend-karambit",name:"태양의 불꽃 - 카람빗",damage:85,fireRate:3,range:5,color:"#ffad73",skill:"초가속",skillText:"5초간 공격속도 +200% (3배)",cooldown:30000},
     {id:"legend-arbiter",name:"어비터 아이스",damage:110,fireRate:1.5,range:5,color:"#b6eaff",skill:"빙결 폭풍",skillText:"전방 30m × 폭 16m 범위의 적에게 50 피해 · 이동과 공격 10초 정지 · 초당 빙결 피해 30",cooldown:30000}
   ];
+  const weapons = liveTraining?.weapons?.length ? liveTraining.weapons.map(w=>({...defaultWeapons.find(d=>d.id===w.id),...w})) : defaultWeapons;
+  // Warehouse arena with open gates, three fighting lanes and solid cover.
   const starts = [
-    {id:"front",name:"정면 표적",x:0,z:2,hp:480},
-    {id:"left",name:"좌측 표적",x:-4,z:1,hp:480},
-    {id:"right",name:"우측 표적",x:4,z:1,hp:480},
-    {id:"rear",name:"후방 표적",x:0,z:-6,hp:480},
-    {id:"heavy",name:"중장갑 표적",x:-9,z:-7,hp:900},
-    {id:"far",name:"거리 표적",x:9,z:-7,hp:900},
-    {id:"dps",name:"무적 DPS 표적",x:-6,z:8,hp:1000000,immortal:true}
+    {id:"front",name:"창고 정면",x:0,z:1,hp:480},
+    {id:"left",name:"좌측 통로",x:-22,z:0,hp:480},
+    {id:"right",name:"우측 통로",x:19,z:-3,hp:480},
+    {id:"rear",name:"북쪽 수비",x:0,z:-21,hp:480},
+    {id:"heavy",name:"왼쪽 엄폐",x:-22,z:15,hp:900},
+    {id:"far",name:"오른쪽 엄폐",x:22,z:15,hp:900},
+    {id:"dps",name:"무적 DPS 표적",x:-6,z:18,hp:1000000,immortal:true}
+  ];
+  const barrier=(id,x,z,w,d,h=2.8,kind="barrier",color="#82918b")=>({id,x,z,w,d,h,kind,color,rotation:0});
+  const arenaObstacles=[
+    barrier("warehouse-nw",-7,-10,8,1),barrier("warehouse-ne",7,-10,8,1),
+    barrier("warehouse-sw",-7,10,8,1),barrier("warehouse-se",7,10,8,1),
+    barrier("warehouse-wn",-11,-6,1,8),barrier("warehouse-ws",-11,6,1,8),
+    barrier("warehouse-en",11,-6,1,8),barrier("warehouse-es",11,6,1,8),
+    barrier("warehouse-inner-a",-4,-2,5,1,2.3),barrier("warehouse-inner-b",4,3,5,1,2.3),
+    barrier("warehouse-inner-c",0,-6,1,3,2.3),
+    barrier("warehouse-crate-a",-5,5,1.8,1.8,1.3,"crate"),
+    barrier("warehouse-crate-b",5,-5,1.8,1.8,1.3,"crate"),
+    barrier("west-container-n",-23,-19,8,3,2.5,"container","#718b84"),
+    barrier("east-container-n",23,-19,8,3,2.5,"container","#8c816e"),
+    barrier("west-container-s",-23,18,8,3,2.5,"container","#8c816e"),
+    barrier("east-container-s",23,18,8,3,2.5,"container","#718b84"),
+    barrier("west-flank",-18,-6,2,7,2.2,"container","#a16f59"),
+    barrier("east-flank",18,6,2,7,2.2,"container","#a16f59"),
+    barrier("west-sandbag",-19,8,4.5,1.2,1.1,"sandbag"),
+    barrier("east-sandbag",19,-8,4.5,1.2,1.1,"sandbag"),
+    barrier("south-cover-a",-12,22,4,1.2,1.1,"sandbag"),
+    barrier("south-cover-b",12,22,4,1.2,1.1,"sandbag"),
+    barrier("north-cover-a",-12,-24,4,1.2,1.1,"sandbag"),
+    barrier("north-cover-b",12,-24,4,1.2,1.1,"sandbag"),
+    barrier("west-crate",-27,1,2,2,1.2,"crate"),
+    barrier("east-crate",27,1,2,2,1.2,"crate")
   ];
   const world = {
-    id:"offline-training",name:"전투 훈련장",size:82,spawn:{x:0,z:13},
-    roads:[{x:0,z:2,w:34,d:34}],buildings:[],terrain:[],landmarks:[],radiationZones:[{id:"offstage-rad",x:150,z:150,radius:10,hpPerSecond:0,maxHpPerSecond:0,minMaxHp:100}],
-    lootSpawns:[],enemySpawns:[],accessDoors:[],extractions:[],
-    obstacles:[
-      {id:"cover-a",x:-12,z:5,w:4.5,d:1.2,h:1.1,kind:"sandbag",rotation:0},
-      {id:"cover-b",x:12,z:5,w:4.5,d:1.2,h:1.1,kind:"sandbag",rotation:0},
-      {id:"cover-c",x:-12,z:-10,w:4.5,d:1.2,h:1.1,kind:"sandbag",rotation:0},
-      {id:"cover-d",x:12,z:-10,w:4.5,d:1.2,h:1.1,kind:"sandbag",rotation:0}
-    ]
+    id:"offline-training",name:"창고 전투 훈련장",size:82,spawn:{x:0,z:16},
+    roads:[],buildings:[],terrain:[{id:"training-yard",kind:"yard",x:0,z:0,w:82,d:82}],landmarks:[],radiationZones:[{id:"offstage-rad",x:150,z:150,radius:10,hpPerSecond:0,maxHpPerSecond:0,minMaxHp:100}],
+    lootSpawns:[],enemySpawns:[],accessDoors:[],extractions:[],obstacles:arenaObstacles
   };
   let view, enemies=[], selected=0, lastShot=0, time=0, lastFrame=0, lastSnapshot=0;
-  let kills=0, damageDone=0, playerHp=100, running=true, ai=false, seq=0;
+  let kills=0, damageDone=0, playerHp=100, running=true, ai=false, seq=0, firing=false;
+  const AI_TICK=.1, AI_BUDGET_MS=1.25;
+  let aiAccumulator=0,aiMs=0,aiPeakMs=0,aiChecks=0,aiTurn=0,frameMs=16.7,lastPerfAt=0,overview=false;
   const keys = new Set();
   const eventLog=[];
   const skillReadyAt=new Map();
@@ -91,6 +115,8 @@
   }
   function sync(){
     view.setSnapshot(makeSnapshot());
+    const trainer=view.actorMap.get("trainer");
+    if(trainer&&trainer.root.userData.trainingWeapon!==weapon().id){trainer.setWeapon(weapon().id,weapon().modelFamily||"melee",weapon().attachments||{});trainer.root.userData.trainingWeapon=weapon().id;}
     for(const e of enemies){
       const actor=view.actorMap.get(e.id);
       if(actor&&!actor.root.userData.trainingArmed){
@@ -107,7 +133,7 @@
     cancelDashTarget();
     dashMotion=null;
     selected=index;
-    view.setWeapon(weapon().id,"melee");
+    view.setWeapon(weapon().id,weapon().modelFamily||"melee",weapon().attachments||{});
     weaponName.textContent=weapon().name;
     weaponStats.textContent="기본 공격 "+weapon().damage+" · 사거리 "+weapon().range+"m · 초당 "+weapon().fireRate+"회";
     $("skill-name").textContent=weapon().skill;
@@ -116,26 +142,48 @@
     log("무기 장착: "+weapon().name);
     sync();
   }
+  function addArenaFloor(){
+    const root=new H();
+    const box=(x,y,z,w,h,d,color)=>{
+      const mesh=new U(new lh(w,h,d,1,.015),new Lo({color}));
+      mesh.position.set(x,y,z);mesh.receiveShadow=true;root.add(mesh);
+    };
+    box(0,-.005,0,72,.04,70,"#777e78");
+    box(0,.025,0,27,.025,21,"#696f6a");
+    box(-32,.025,0,.12,.025,69,"#d6d0ae");
+    box(32,.025,0,.12,.025,69,"#d6d0ae");
+    box(0,.026,-33,64,.025,.12,"#d6d0ae");
+    box(0,.026,33,64,.025,.12,"#d6d0ae");
+    box(0,.03,25,4,.025,.16,"#d5c27b");
+    view.stage.add(root);
+  }
+  function toggleOverview(){
+    overview=!overview;view.scopeZoom=overview?2.6:1;view.updateCameraProjection();
+    $("map-overview").textContent=overview?"M · 전투 시야":"M · 맵 전체 보기";
+  }
   function reset(){
     cancelDashTarget();
     dashMotion=null;
     view.start(world,"trainer");
-    enemies=starts.map((e)=>({...e,maxHp:e.hp,cap:e.hp,burn:0,burnCarry:0,attackAt:0,frozenUntil:0,arbiterFrozenUntil:0,freezeNextAt:0}));
+    view.scopeSpeed=0;overview=false;
+    addArenaFloor();
+    const count=Math.max(2,Math.min(6,Number($("ai-count").value)||6));
+    enemies=starts.filter((e,i)=>e.immortal||i<count).map((e)=>({...e,maxHp:e.hp,cap:e.hp,burn:0,burnCarry:0,attackAt:0,frozenUntil:0,arbiterFrozenUntil:0,freezeNextAt:0,waypoint:null,replanAt:0}));
     skillReadyAt.clear();karambitBuffUntil=0;
     dpsEvents=[];dpsTotal=0;dpsPeak=0;dpsNow=0;dpsStartedAt=0;
     for(const visual of skillVisuals){visual.mesh.removeFromParent();visual.mesh.geometry.dispose();visual.mesh.material.dispose();}
     skillVisuals.length=0;
     view.movement.state.x=0;
-    view.movement.state.z=13;
+    view.movement.state.z=16;
     view.movement.state.stamina=100;
     view.movement.state.maxStamina=100;
-    view.pred.set(0,0,13);
+    view.pred.set(0,0,16);
     view.directionAim(0,-1);
-    kills=0;damageDone=0;playerHp=100;lastShot=0;time=0;running=true;
+    kills=0;damageDone=0;playerHp=100;lastShot=0;time=0;running=true;aiAccumulator=0;aiMs=0;aiPeakMs=0;aiChecks=0;
     select(selected);
-    status.textContent="로컬 3D 훈련장 · 연결 없이 실행 중";
+    status.textContent=liveTraining?"장착 장비로 훈련 중 · 탄약과 아이템은 저장되지 않습니다":"로컬 3D 훈련장 · 연결 없이 실행 중";
     status.classList.remove("error");
-    log("표적 6개와 무적 DPS 표적 배치 완료");
+    log("창고 맵 · 표적 "+count+"개와 무적 DPS 표적 배치 완료");
     updateSkillHud();
     updateDps(performance.now());
   }
@@ -166,6 +214,18 @@
     if(before>0&&e.hp<=0)kills++;
     return dealt;
   }
+  function fireTrainingGun(w,now){
+    const px=view.pred.x,pz=view.pred.z,ax=view.aim.x,az=view.aim.z;
+    const candidates=enemies.filter(e=>e.hp>0).map(e=>{
+      const dx=e.x-px,dz=e.z-pz,along=dx*ax+dz*az;
+      return {e,along,side:Math.abs(dx*az-dz*ax)};
+    }).filter(v=>v.along>0&&v.along<=w.range&&v.side<.9&&segmentClear({x:px,z:pz},{x:v.e.x,z:v.e.z}))
+      .sort((a,b)=>a.along-b.along);
+    view.shot(px,pz,ax,az,false,"trainer");
+    const target=candidates[0];
+    if(target)hurt(target.e,w.damage,w.color||"#eed7a1");
+    window.__peAudio?.gunshot?.({weaponId:w.id,suppressed:!!w.suppressed,distance:0,eventKey:"training:"+now});
+  }
   function strike(){
     if(!running||playerHp<=0||dashTargeting||dashMotion)return;
     const now=performance.now();
@@ -173,6 +233,7 @@
     const rate=w.fireRate*(w.id==="legend-karambit"&&now<karambitBuffUntil?3:1);
     if(now-lastShot<1000/rate)return;
     lastShot=now;
+    if(w.mode&&w.mode!=="melee"){fireTrainingGun(w,now);return;}
     const actor=view.actorMap.get("trainer");
     if(actor){
       actor.root.userData.motion=actor.root.userData.motion||{};
@@ -420,7 +481,7 @@
   function updateDashPreview(){
     if(!dashTargeting||!dashPreview)return;
     const araya=weapon().id==="legend-araya";
-    const trace=araya?traceDash():{ox:view.pred.x,oz:view.pred.z,ax:view.aim.x,az:view.aim.z,travel:18};
+    const trace=araya?traceDash():{ox:view.pred.x,oz:view.pred.z,ax:view.aim.x,az:view.aim.z,travel:30};
     const {ox,oz,ax,az,travel}=trace;
     dashPreviewTravel=travel;
     const p=dashPreview;
@@ -488,31 +549,31 @@
       skillVisuals.push({mesh,born:now,life,kind:"iceGPU"});return mesh;
     };
     const sheet=(height)=>{const g=new oo();
-      g.setAttribute("position",new Ja([-4,height,0,4,height,0,-4,height,18,4,height,18],3));
+      g.setAttribute("position",new Ja([-8,height,0,8,height,0,-8,height,30,8,height,30],3));
       g.setIndex([0,1,2,1,3,2]);g.computeVertexNormals();return g;};
     add(sheet(.12),vertexBase,`
       uniform float uTime;uniform float uLife;varying vec3 vLocal;
       ${noiseGLSL}
       void main(){vec2 p=vLocal.xz;float front=uTime*31.;
         float reveal=1.-smoothstep(front-.7,front+.15,p.y);
-        float edge=smoothstep(0.,.32,4.-abs(p.x))*smoothstep(0.,.4,p.y)*smoothstep(0.,.5,18.-p.y);
+        float edge=smoothstep(0.,.32,8.-abs(p.x))*smoothstep(0.,.4,p.y)*smoothstep(0.,.5,30.-p.y);
         vec2 warped=p*1.18+vec2(noise(p*1.7),noise(p*1.9+7.3))*.75;
         float crack=1.-smoothstep(.008,.045,cells(warped));
         crack+=.24*(1.-smoothstep(.004,.024,cells(warped*2.4)))*noise(p*4.);
         float grain=noise(p*17.);float frost=noise(p*3.1)*.65+grain*.35;
         float crest=exp(-pow((p.y-front)*1.6,2.));
-        float fade=1.-smoothstep(3.7,5.,uTime);
+        float fade=1.-smoothstep(9.,10.,uTime);
         float ribs=pow(max(0.,sin(p.y*2.2+noise(p*2.)*2.)),18.)*.18;
         vec3 c=mix(vec3(.025,.16,.25),vec3(.24,.58,.72),frost);
         c+=crack*vec3(.36,.78,1.)*(.65+exp(-max(0.,uTime-p.y/31.)*3.)*1.6);
         c+=crest*vec3(.75,1.25,1.5)+ribs;
         gl_FragColor=vec4(c,edge*reveal*fade*(.58+crack*.3));
-      }`,5000);
+      }`,10000);
     const crystalVertex=`uniform float uTime;attribute vec3 aCenter;attribute vec2 aData;
       varying vec3 vNormal;varying vec3 vWorld;varying vec3 vLocal;varying float vAge;varying float vSeed;
       void main(){float age=uTime-aCenter.z/31.;vAge=age;vSeed=aData.y;
         float rise=clamp(age/.16,0.,1.);rise=1.-pow(1.-rise,3.);
-        float melt=1.-smoothstep(2.5,4.5,age);
+        float melt=1.-smoothstep(8.5,10.,age);
         vec3 p=position;p.y*=rise*melt;
         if(aData.x>0.5){float t=max(0.,age);float angle=t*(1.3+aData.y);
           mat2 rot=mat2(cos(angle),-sin(angle),sin(angle),cos(angle));p.xy=rot*p.xy;
@@ -545,8 +606,8 @@
       };
       for(let i=0;i<count;i++){
         const seed=(Math.sin(i*72.17+4.2)*437.7)%1,rand=Math.abs(seed);
-        const z=.4+(i+.25)/count*17.1;
-        const x=air?Math.sin(i*9.7)*3.6:(i%3===0?Math.sin(i*4.7)*2.7:(i%2?1:-1)*(3.2+rand*.6));
+        const z=.4+(i+.25)/count*29.1;
+        const x=air?Math.sin(i*9.7)*7.2:(i%3===0?Math.sin(i*4.7)*5.4:(i%2?1:-1)*(6.4+rand*.8));
         const height=air?.17+rand*.32:(i%3===0?.35+rand*.8:1.15+rand*1.6);
         const radius=air?.05+rand*.065:.15+rand*.24;
         const center=[x,.13,z],tip=[Math.sin(i)*height*.22,height,.13*height];
@@ -555,13 +616,13 @@
       }
       const g=new oo();g.setAttribute("position",new Ja(positions,3));g.setAttribute("normal",new Ja(normals,3));
       g.setAttribute("aCenter",new Ja(centers,3));g.setAttribute("aData",new Ja(data,2));
-      add(g,crystalVertex,crystalFragment,air?2200:5000);
+      add(g,crystalVertex,crystalFragment,air?3000:10000);
     };
     crystals(false);crystals(true);
     add(sheet(.46),vertexBase,`
       uniform float uTime;uniform float uLife;varying vec3 vLocal;${noiseGLSL}
       void main(){vec2 p=vLocal.xz;float age=uTime-p.y/31.;if(age<0.)discard;
-        float edge=smoothstep(0.,.9,4.-abs(p.x))*smoothstep(0.,.6,p.y)*smoothstep(0.,.8,18.-p.y);
+        float edge=smoothstep(0.,.9,8.-abs(p.x))*smoothstep(0.,.6,p.y)*smoothstep(0.,.8,30.-p.y);
         float cloud=noise(p*1.25+vec2(uTime*.6,-uTime*1.8));
         float curl=noise(p*3.2+vec2(-uTime,uTime*.5));
         float crest=exp(-age*age*35.);
@@ -680,30 +741,86 @@
     $("damage").textContent=String(Math.round(damageDone));
     $("targets").textContent=String(enemies.filter((e)=>e.hp>0&&!e.immortal).length);
   }
+  function segmentClear(a,b){
+    aiChecks++;
+    const dx=b.x-a.x,dz=b.z-a.z;
+    for(const o of arenaObstacles){
+      let lo=0,hi=1;
+      for(const [p,v,min,max] of [[a.x,dx,o.x-o.w/2-.48,o.x+o.w/2+.48],[a.z,dz,o.z-o.d/2-.48,o.z+o.d/2+.48]]){
+        if(Math.abs(v)<1e-8){if(p<min||p>max){lo=2;break;}continue;}
+        lo=Math.max(lo,Math.min((min-p)/v,(max-p)/v));
+        hi=Math.min(hi,Math.max((min-p)/v,(max-p)/v));
+      }
+      if(lo<=hi)return false;
+    }
+    return true;
+  }
+  function aiWaypoint(e,target,now){
+    if(e.waypoint&&now<e.replanAt&&segmentClear(e,e.waypoint))return e.waypoint;
+    e.replanAt=now+850+(e.id.length%4)*130;
+    if(segmentClear(e,target)){e.waypoint=target;return target;}
+    let best=null,bestScore=Infinity;
+    const blockers=arenaObstacles.filter(o=>Math.hypot(o.x-e.x,o.z-e.z)<15).slice(0,8);
+    for(const o of blockers)for(const sx of [-1,1])for(const sz of [-1,1]){
+      const corner={x:o.x+sx*(o.w/2+1.3),z:o.z+sz*(o.d/2+1.3)};
+      if(!segmentClear(e,corner))continue;
+      const score=Math.hypot(corner.x-e.x,corner.z-e.z)+Math.hypot(target.x-corner.x,target.z-corner.z)+(segmentClear(corner,target)?0:8);
+      if(score<bestScore){best=corner;bestScore=score;}
+    }
+    e.waypoint=best;return best;
+  }
   function updateAi(dt){
     if(!ai)return;
-    const px=view.pred.x,pz=view.pred.z,now=performance.now();
-    for(const e of enemies){
-      if(e.hp<=0||e.immortal||e.airborneUntil>now||e.frozenUntil>now)continue;
+    aiAccumulator=Math.min(AI_TICK,aiAccumulator+dt);
+    if(aiAccumulator<AI_TICK)return;
+    aiAccumulator=0;
+    const started=performance.now(),px=view.pred.x,pz=view.pred.z,mode=$("ai-mode").value;
+    const active=enemies.filter(e=>e.hp>0&&!e.immortal);
+    for(let n=0;n<active.length;n++){
+      if(performance.now()-started>AI_BUDGET_MS)break;
+      const i=(aiTurn+n)%active.length,e=active[i],now=performance.now();
+      if(e.airborneUntil>now||e.frozenUntil>now)continue;
       const dx=px-e.x,dz=pz-e.z,d=Math.hypot(dx,dz);
-      if(d>3&&d<18){
-        const step=Math.min(d-3,2.7*dt);
-        e.x+=dx/d*step;e.z+=dz/d*step;
+      if(d>30)continue;
+      const los=segmentClear(e,{x:px,z:pz});
+      const side=i%2?1:-1,flank=mode==="flank"&&d>5;
+      const target=flank?{x:px-dz/Math.max(d,1)*side*5,z:pz+dx/Math.max(d,1)*side*5}:{x:px,z:pz};
+      const hold=mode==="guard"&&d>11;
+      const desired=hold?{x:e.x,z:e.z}:aiWaypoint(e,target,now);
+      if(desired&&d>3){
+        const vx=desired.x-e.x,vz=desired.z-e.z,vd=Math.hypot(vx,vz);
+        if(vd>.2){
+          const step=Math.min(vd,2.7*AI_TICK),next={x:e.x+vx/vd*step,z:e.z+vz/vd*step};
+          if(segmentClear(e,next)){e.x=next.x;e.z=next.z;}
+          else e.replanAt=0;
+        }
       }
-      if(d<=3&&now-e.attackAt>1400){
+      if(los&&d<=10&&now-e.attackAt>1400){
         e.attackAt=now;
-        playerHp=Math.max(0,playerHp-7);
+        playerHp=Math.max(0,playerHp-3);
         view.reactHit("trainer");
         if(playerHp<=0){running=false;log("훈련 종료 · R 키로 재시작");}
       }
     }
+    aiTurn=(aiTurn+1)%Math.max(1,active.length);
+    aiMs=performance.now()-started;aiPeakMs=Math.max(aiPeakMs,aiMs);
+  }
+  function updatePerformance(now){
+    if(now-lastPerfAt<500)return;
+    lastPerfAt=now;
+    const el=$("perf-stats"),draws=view.renderer.info.render.calls;
+    el.textContent="AI "+aiMs.toFixed(2)+" ms / 10 Hz (최고 "+aiPeakMs.toFixed(2)+") · 프레임 "+frameMs.toFixed(1)+" ms · 그리기 "+draws+" · 적 "+enemies.filter(e=>e.hp>0&&!e.immortal).length+" / 6";
+    el.classList.toggle("warn",aiMs>AI_BUDGET_MS||frameMs>33.3||draws>650);
+    aiChecks=0;
   }
   function frame(now){
     requestAnimationFrame(frame);
     try{
       const dt=Math.min(.05,(now-(lastFrame||now))/1000);
       lastFrame=now;
+      frameMs=frameMs*.92+dt*1000*.08;
       if(running){
+        if(firing&&weapon().mode==="auto")strike();
         let mx=Number(keys.has("d")||keys.has("arrowright"))-Number(keys.has("a")||keys.has("arrowleft"));
         let mz=Number(keys.has("s")||keys.has("arrowdown"))-Number(keys.has("w")||keys.has("arrowup"));
         const len=Math.hypot(mx,mz);
@@ -716,7 +833,7 @@
         updateBurn(dt);
         updateFreeze(now);
         time+=dt;
-        if(now-lastSnapshot>120){lastSnapshot=now;sync();}
+        if(now-lastSnapshot>120){lastSnapshot=now;sync();updateDps(now);}
       }else{view.moveX=0;view.moveZ=0;view.sprinting=false;}
       view.update(dt,dt);
       for(const e of enemies){
@@ -729,27 +846,30 @@
       updateDashPreview();
       updateSkillVisuals(now);
       updateSkillHud();
-      updateLabels();
-      updateDps(now);
-      updateTargetLabels();
+      updatePerformance(now);
     }catch(err){running=false;error(err);}
   }
   try{
     view=new vg(canvas); Q=view;
     reset();
     document.querySelectorAll(".weapon").forEach((b,i)=>b.addEventListener("click",()=>select(i)));
+    if(liveTraining){ai=true;$("ai-toggle").checked=true;}
     $("reset").addEventListener("click",reset);
+    $("map-overview").addEventListener("click",toggleOverview);
     $("attack").addEventListener("click",strike);
     $("skill-button").addEventListener("click",()=>{
       if(!["legend-araya","legend-arbiter"].includes(weapon().id))useSkill();
     });
-    $("ai-toggle").addEventListener("change",(e)=>{ai=e.target.checked;log(ai?"표적 AI 이동 켜짐":"표적 AI 이동 꺼짐");});
+    $("ai-toggle").addEventListener("change",(e)=>{ai=e.target.checked;log(ai?"적 AI 시험 켜짐":"적 AI 시험 꺼짐");});
+    $("ai-count").addEventListener("change",reset);
+    $("ai-mode").addEventListener("change",()=>log("AI 시험: "+$("ai-mode").selectedOptions[0].textContent));
     window.addEventListener("keydown",(e)=>{
       const k=e.key.toLowerCase();
       if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
       keys.add(k);
-      if(k>="1"&&k<="4"&&!e.repeat)select(Number(k)-1);
+      if(k>="1"&&k<="4"&&!e.repeat&&Number(k)<=weapons.length)select(Number(k)-1);
       if(k==="r"&&!e.repeat)reset();
+      if(k==="m"&&!e.repeat)toggleOverview();
       if(k===" "&&!e.repeat)strike();
       if(k==="q"&&!e.repeat){
         if(["legend-araya","legend-arbiter"].includes(weapon().id))beginDashTarget();
@@ -762,17 +882,18 @@
       keys.delete(k);
       if(k==="q"&&dashTargeting)releaseDashTarget();
     });
-    window.addEventListener("blur",()=>{keys.clear();cancelDashTarget();});
+    window.addEventListener("blur",()=>{keys.clear();firing=false;cancelDashTarget();});
+    window.addEventListener("pointerup",()=>{firing=false;});
     canvas.addEventListener("pointermove",(e)=>view.pointerAim(e.clientX,e.clientY));
     canvas.addEventListener("pointerdown",(e)=>{
       if(e.button!==0)return;
-      if(!dashTargeting)strike();
+      if(!dashTargeting){firing=true;strike();}
     });
     canvas.addEventListener("contextmenu",(e)=>{e.preventDefault();if(dashTargeting)cancelDashTarget();});
     window.__TRAINING__={get view(){return view;},get enemies(){return enemies;},
       get state(){return {weapon:weapon().id,position:{x:view.pred.x,z:view.pred.z},
         hp:playerHp,kills,damageDone,targets:enemies.filter((e)=>e.hp>0&&!e.immortal).length,dpsNow,dpsPeak,dpsTotal,
-        drawCalls:view.renderer.info.render.calls,skillReadyIn:Math.max(0,(skillReadyAt.get(weapon().id)||0)-performance.now()),
+        drawCalls:view.renderer.info.render.calls,aiMs,aiPeakMs,frameMs,aiChecks,overview,skillReadyIn:Math.max(0,(skillReadyAt.get(weapon().id)||0)-performance.now()),
         karambitBuff:Math.max(0,karambitBuffUntil-performance.now()),
         frozen:enemies.filter(e=>e.frozenUntil>performance.now()).map(e=>e.id),
         dashTargeting,dashTravel:dashPreviewTravel,dashMoving:!!dashMotion,

@@ -14,5 +14,5 @@ run.cmd를 더블클릭하려면 Node.js 22 이상이 필요합니다. 또는 no
 
 scenario.json의 player.weaponId와 enemies, actions를 바꿔 재현 상황을 만들 수 있습니다. enemy.ai=true면 실제 적 AI가 동작하고, 기본값 false면 고정 표적입니다. 기본 공격은 Raid.command의 fire 명령으로 입력됩니다. 미리 만든 scenario-thunder.json, scenario-karambit.json, scenario-arbiter.json, scenario-ai.json도 사용할 수 있습니다. 서버 코드 스냅샷을 갱신할 때는 python3 sync-runtime.py <게임 소스 디렉터리>를 실행하세요. 이 작업은 로컬 파일만 바꿉니다.
 
-
-
+## 실서버 훈련 맵
+은신처의 맵 선택에서 창고 훈련장을 고르면 현재 장착된 주무기·보조무기·권총·근접 무기를 읽어 옵니다. 훈련은 브라우저의 별도 연습 장면으로 실행하며 탄약·소모품 사용, 피해, 처치, 사망을 계정 또는 원정 정산에 기록하지 않습니다. 오른쪽은 시험 유형과 표적 초기화만 표시합니다. 로비와 훈련 화면을 생성하려면 저장소 루트에서 `python training-ground/build-live-training.py`를 실행하세요.
