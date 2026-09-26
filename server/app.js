@@ -286,6 +286,10 @@ async function route(request, response, context) {
     if (typeof body.code !== 'string' || !/^[A-Za-z0-9]{6}$/.test(body.code)) throw gameError('INVALID_CODE', 'Invite code must have six characters');
     return send(response, 200, { ok: true, room: context.manager.joinRoom(user, body.code) });
   }
+  if (request.method === 'POST' && path === '/api/rooms/ready') {
+    const body = await readJson(request);
+    return send(response, 200, { ok: true, room: context.manager.setReady(user.id, body.ready) });
+  }
   if (request.method === 'POST' && path === '/api/rooms/leave') { context.manager.leaveRoom(user.id); return send(response, 200, { ok: true }); }
   if (request.method === 'POST' && path === '/api/rooms/start') return send(response, 200, { ok: true, raidId: context.manager.startRoom(user.id) });
 
@@ -392,7 +396,7 @@ function statusFor(code) {
   if (code === 'UNAUTHENTICATED' || code === 'BAD_LOGIN') return 401;
   if (code === 'LEADER_ONLY') return 403;
   if (['ROOM_NOT_FOUND', 'ITEM_NOT_FOUND', 'TALENT_NOT_FOUND', 'NOT_FOUND'].includes(code)) return 404;
-  if (['USERNAME_TAKEN', 'INSUFFICIENT_CURRENCY', 'INSUFFICIENT_ITEMS', 'ITEM_NOT_OWNED', 'ROOM_FULL', 'ROOM_STATE', 'RAID_ACTIVE', 'MEMBER_OFFLINE', 'TALENT_MAXED', 'TALENT_PREREQUISITE'].includes(code)) return 409;
+  if (['USERNAME_TAKEN', 'INSUFFICIENT_CURRENCY', 'INSUFFICIENT_ITEMS', 'ITEM_NOT_OWNED', 'ROOM_FULL', 'ROOM_STATE', 'RAID_ACTIVE', 'MEMBER_OFFLINE', 'MEMBER_NOT_READY', 'TALENT_MAXED', 'TALENT_PREREQUISITE'].includes(code)) return 409;
   if (!code || code === 'INTERNAL') return 500;
   return 400;
 }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {WORLD} from '../../shared/world.ts';
 const overlap=(a,b,g=0)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+g&&Math.abs(a.z-b.z)<(a.d+b.d)/2+g;
 test('coast and lake volumes fully block water without covering roads',()=>{
- const water=WORLD.terrain.filter(t=>/^(coast-sea-|nuclear-lake-)/.test(t.id));assert.equal(water.length,130);
+ const water=WORLD.terrain.filter(t=>/^(coast-sea-|nuclear-lake-)/.test(t.id));assert.equal(water.length,560);
  for(const t of water){const b=WORLD.obstacles.find(o=>o.id==='water-block-'+t.id);assert.ok(b);for(const key of ['x','z','w','d'])assert.equal(b[key],t[key]);assert.ok(!WORLD.roads.some(r=>overlap(t,r)));}
  for(const p of [...WORLD.enemySpawns,...WORLD.lootSpawns])assert.ok(!water.some(t=>overlap({...p,w:1,d:1},t)),p.id);
 });
@@ -13,4 +13,18 @@ test('coastal, nuclear, and farm buildings have clear structural footprints',()=
  for(const b of buildings.filter(b=>b.x>120&&b.z>90)){assert.equal(b.wallColor,'#a94335');assert.equal(b.occlusion.fadeRoof,true);assert.ok(WORLD.lootSpawns.some(l=>l.buildingId===b.id));}
  assert.equal(WORLD.landmarks.find(l=>l.id==='hydro').kind,'nuclear');
  assert.equal(WORLD.obstacles.filter(o=>o.kind==='cooling-tower').length,2);
+});
+
+test('curved water bodies taper naturally to the map boundary',()=>{
+ for(const [prefix,sea] of [['coast-sea-',true],['nuclear-lake-',false]]){
+  const rows=WORLD.terrain.filter(t=>t.id.startsWith(prefix));
+  assert.ok(rows.every(r=>r.d<=.5));
+  for(let i=1;i<rows.length;i++)assert.equal(rows[i].z-rows[i-1].z,.5);
+  assert.ok(sea?rows[0].w<.01:rows.at(-1).w<5);
+  assert.ok(!WORLD.obstacles.some(o=>o.id.startsWith('shore-join-'+prefix)||o.id==='shore-cap-'+prefix));
+ }
+});
+test('nuclear site contains reserved reactor, switchyard and pumping infrastructure',()=>{
+ const facilities=WORLD.obstacles.filter(o=>o.kind==='nuclear-equipment');assert.equal(facilities.length,3);
+ for(const o of facilities){assert.ok(!WORLD.roads.some(r=>overlap(o,r,1)),o.id);assert.ok(!WORLD.buildings.some(b=>overlap(o,b,1)),o.id);assert.ok(!WORLD.obstacles.some(b=>b!==o&&b.kind==='tree'&&overlap(o,b,1)),o.id);}
 });

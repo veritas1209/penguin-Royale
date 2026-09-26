@@ -8,22 +8,22 @@ const mg=group=>group;
 // Bundle-native Three.js district art; aliases supplied by the shipped renderer.
 export function __bcCoastalVisuals129(world){
  const root=new H,solid=new H,steam=[],materials=[],roofs=[];const temp=new Zc(1,1),Attribute=temp.attributes.position.constructor;temp.dispose();root.name='coastal-nuclear-districts-129';
- const waterRows=(world.terrain??[]).filter(t=>/^(coast-sea-|nuclear-lake-)/.test(t.id));
+ const edge=(sea,z)=>{const t=Math.max(0,Math.min(1,(z-(sea?100:-240))/140));return sea?-240+100*(1-Math.sqrt(1-t*t)):190+50*(1-Math.sqrt(1-t*t));};
+ const ribbon=(sea,near,far,y,color)=>{const v=[];for(let z=sea?100:-240;z<(sea?240:-100);z+=.5){const s=sea?1:-1,a=edge(sea,z),b=edge(sea,z+.5);v.push(a+s*near,y,z,b+s*near,y,z+.5,b+s*far,y,z+.5,a+s*near,y,z,b+s*far,y,z+.5,a+s*far,y,z);}const geo=new oo;geo.setAttribute('position',new Attribute(v,3));geo.computeVertexNormals();const mat=new fl({color,roughness:1,side:2});root.add(new U(geo,mat));materials.push(mat);};
  for(const sea of [true,false]){
-  const rows=waterRows.filter(t=>t.id.startsWith(sea?'coast-sea-':'nuclear-lake-'));if(!rows.length)continue;
-  const vertices=[];for(const r of rows){const l=r.x-r.w/2,h=r.x+r.w/2,a=r.z-r.d/2,b=r.z+r.d/2;vertices.push(l,.055,a,h,.055,a,h,.055,b,l,.055,a,h,.055,b,l,.055,b);}
+  const vertices=[];for(let z=sea?100:-240;z<(sea?240:-100);z+=.5){const a=edge(sea,z),b=edge(sea,z+.5),outer=sea?-240:240;vertices.push(outer,.12,z,a,.12,z,b,.12,z+.5,outer,.12,z,b,.12,z+.5,outer,.12,z+.5);}
   const geo=new oo;geo.setAttribute('position',new Attribute(vertices,3));geo.computeVertexNormals();
-  const material=new ul({side:2,uniforms:{time:{value:0},sea:{value:sea?1:0}},vertexShader:`varying vec3 wp;void main(){wp=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform float time;uniform float sea;varying vec3 wp;void main(){vec2 p=wp.xz;float wave=sin(p.x*.72+p.y*.37-time*1.4)*sin(p.y*1.31-time*.72);float fine=pow(max(0.,sin(p.x*3.+p.y*1.9-time*2.)),20.);float swell=sin(p.x*.13-p.y*.11-time*.36);vec3 base=mix(vec3(.12,.31,.34),vec3(.055,.24,.33),sea);vec3 color=base+wave*.024+swell*.021+vec3(.26,.36,.35)*fine*.19;gl_FragColor=vec4(color,1.);
+  const material=new ul({side:2,uniforms:{time:{value:0},sea:{value:sea?1:0}},vertexShader:`varying vec3 wp;void main(){wp=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform float time;uniform float sea;varying vec3 wp;
+float noise(vec2 p){return sin(p.x*.43+sin(p.y*.27))*cos(p.y*.36+sin(p.x*.21));}
+void main(){vec2 p=wp.xz;float t=clamp((p.y-mix(-240.,100.,sea))/140.,0.,1.);float bend=1.-sqrt(max(0.,1.-t*t));float edge=mix(190.+50.*bend,-240.+100.*bend,sea);float distance=max(0.,(edge-p.x)*mix(-1.,1.,sea));float ripple=noise(p+vec2(time*.24,-time*.3))*.018+noise(p*.5+time*.08)*.028;vec3 deep=mix(vec3(.13,.30,.31),vec3(.06,.27,.35),sea);vec3 shallow=mix(vec3(.27,.43,.40),vec3(.27,.53,.53),sea);vec3 color=mix(shallow,deep,smoothstep(0.,14.,distance))+ripple;
+float phase=distance*.92+sin(p.y*.23+time*.2)*.45+sin(p.y*.67)*.15+time*.95;float crest=pow(max(0.,cos(phase)),18.);float broken=smoothstep(-.5,.65,noise(p*.7+time*.08));float foam=crest*broken*(1.-smoothstep(1.,10.,distance))*sea;float lace=(1.-smoothstep(.1,.8,distance))* (.3+.2*sin(time+p.y*.3));color=mix(color,vec3(.78,.86,.77),clamp(foam*.62+lace,0.,.8));gl_FragColor=vec4(color,1.);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
 }`});root.add(new U(geo,material));materials.push(material);
-  for(let i=0;i<rows.length;i+=2){const r=rows[i],x=r.x+(sea?1:-1)*(r.w/2+.25);q(solid,sea?'#b7ac88':'#9bada0',x,.05,r.z,1.3,.13,4.1);}
- }
- // Continuous stone quay and timber/steel safety rail, matching server colliders exactly.
- for(const o of world.obstacles.filter(o=>o.kind==='shore-rail')){
-  q(solid,'#8c9384',o.x,.18,o.z,o.w,.36,o.d);const along=o.w>o.d,span=along?o.w:o.d;
-  for(const y of [.62,1.12])q(solid,'#756b53',o.x,y,o.z,along?span:.1,.11,along?.1:span);
-  for(let p=-span/2;p<=span/2+.01;p+=2)q(solid,'#514e42',o.x+(along?p:0),.72,o.z+(along?0:p),.19,1.44,.19);
+  ribbon(sea,0,sea?2:1,.115,sea?'#aaa083':'#8e9b82');ribbon(sea,sea?2:1,sea?7:2.8,.10,sea?'#c1b38b':'#a0ac91');
+  // Tangent-aligned railing panels follow one continuous arc; no rectangular quay teeth.
+  for(let z=sea?106:-238;z<(sea?237:-104);z+=3){const x=edge(sea,z)+(sea?8:-3.5),next=edge(sea,Math.min(z+3,sea?240:-100))+(sea?8:-3.5),dx=next-x,span=Math.hypot(dx,3);if(sea&&z>210)continue;for(const y of [.62,1.1]){const beam=q(solid,sea?'#817253':'#758981',(x+next)/2,y,z+1.5,.09,.10,span+.04);beam.rotation.y=Math.atan2(dx,3);}q(solid,sea?'#5d5e48':'#52675f',x,.68,z,.14,1.36,.14);}
+  if(sea)for(let i=0;i<24;i++){const z=116+i*4.8,x=edge(true,z)-2.5-(i%4)*1.25;const rock=gh(solid,i%2?'#667a72':'#7f8a79',x,.17,z,.8+(i%3)*.35,.45+(i%4)*.17,.7+(i%2)*.45);rock.rotation.y=i*1.7;}
  }
  // Open-topped hyperboloid concrete shells with fluted sides and ring foundations.
  for(const o of world.obstacles.filter(o=>o.kind==='cooling-tower')){
@@ -35,12 +35,32 @@ export function __bcCoastalVisuals129(world){
   for(let k=0;k<32;k++){const a=k*Math.PI/16;for(let j=0;j<10;j++){const y=(j+.5)*o.h/10,r=radius(y)+.03;q(solid,'#a5ab9b',o.x+Math.cos(a)*r,y+.6,o.z+Math.sin(a)*r,.075,o.h/10+.04,.075);}}
   for(let k=0;k<9;k++){const puff=gh(root,'#dce4dc',o.x,o.h+2+k*1.5,o.z,2.2+k*.3,1.4,2.2+k*.3);puff.material=puff.material.clone();puff.material.transparent=true;puff.material.opacity=.12;puff.material.depthWrite=false;puff.castShadow=false;steam.push({puff,o,k});}
  }
+ // Industrial hardstand, overhead circulation pipes and security perimeter.
+ q(solid,'#89968a',153,.065,-213,62,.08,49);
+ for(const x of [139,142]){const pipe=_h(solid,'#6b8580',x,1.3,-208,.23,9);pipe.rotation.x=Math.PI/2;}
+ for(const z of [-234,-187]){for(let x=123;x<183;x+=3){if(z===-187&&x>146&&x<160)continue;q(solid,'#64796d',x,1.05,z,.10,2.1,.10);for(const y of [.7,1.8])q(solid,'#95a79b',x+1.5,y,z,3,.045,.045);for(let k=0;k<6;k++)q(solid,'#829489',x+k*.5,1.15,z,.025,1.5,.025);}}
+ for(const b of (world.buildings??[]).filter(b=>b.id.startsWith('hydro-'))){q(solid,'#8d988a',b.x,.05,b.z,b.w+2,.08,b.d+2);for(let i=0;i<4;i++)q(solid,'#c8b66e',b.x-b.w*.3+i*.7,.105,b.z+b.d/2+.5,.35,.015,.5);}
+ // Containment dome, switchyard and water treatment building occupy server-reserved footprints.
+ for(const o of world.obstacles.filter(o=>o.kind==='nuclear-equipment')){
+  const g=new H;g.position.set(o.x,0,o.z);g.name=o.id;q(g,'#7d8982',0,.12,0,o.w,.24,o.d);
+  if(o.id.includes('containment')){_h(g,'#b7bbae',0,4,0,5.6,8);gh(g,'#c7c8b7',0,8,0,5.6,4.1,5.6);_h(g,'#8e9b91',0,1,0,5.72,.6);q(g,'#61796f',0,2.2,5.62,3.3,4.2,.22);for(const x of [-3.6,3.6])q(g,'#e0bd63',x,1,5.7,.25,1.8,.2);}
+  else if(o.id.includes('transformer')){for(const x of [-3.3,3.3]){q(g,'#40595c',x,1.4,0,3,2.6,5.5);for(let z=-2;z<=2;z+=.55)q(g,'#89958e',x,1.5,z,3.3,2.1,.12);for(const z of [-1.5,1.5]){_h(g,'#c5bca1',x,3.2,z,.24,1.2);for(let k=0;k<4;k++)_h(g,'#596968',x,2.85+k*.22,z,.36,.09);}}}
+  else{q(g,'#8e9f96',0,1.6,0,5,3.2,8);q(g,'#566d68',0,3.3,0,5.4,.25,8.4);for(const z of [-2,2]){const pipe=_h(g,'#788c87',0,.7,z,.4,5.6);pipe.rotation.z=Math.PI/2;}}
+  root.add(g);
+ }
+ for(const b of (world.buildings??[]).filter(b=>b.id.startsWith('hydro-'))){
+  const g=new H;g.name='nuclear-turbine-roof';g.userData.buildingId=b.id;
+  for(let x=-b.w/2+1;x<b.w/2;x+=2){q(g,'#acb4a9',b.x+x,b.wallHeight+.28,b.z,.65,.5,b.d*.7);}
+  for(const x of [-b.w*.28,b.w*.28]){q(g,'#536b67',b.x+x,b.wallHeight+.8,b.z,1.4,1.5,2);}
+  q(g,'#d8b851',b.x,b.wallHeight+.13,b.z+b.d*.35,b.w*.8,.16,.35);g.traverse(p=>p.userData.occluder=true);root.add(g);roofs.push({g,b});
+ }
  // Salt-weathered timber cottages; each roof belongs to the existing fadeable roof group.
  for(const b of (world.buildings??[]).filter(b=>b.id.startsWith('fishing-building')||(b.x>120&&b.x<215&&b.z>90&&b.z<235))){
   const g=new H;g.userData.buildingId=b.id;g.name='fishing-pitched-roof';const h=b.wallHeight,w=b.w,d=b.d,farm=b.z>90&&b.x>120;
   for(const side of [-1,1]){const panel=q(g,farm?'#454e48':'#48636a',b.x+side*w*.25,h+.8,b.z,w*.55,.17,d+.45);panel.rotation.z=-side*Math.atan2(1.6,w/2);}
   q(g,'#c4b899',b.x,h+1.65,b.z,.15,.16,d+.5);
   for(let y=0;y<1.5;y+=.18)for(const side of [-1,1])q(g,farm?'#a94335':'#bdaf88',b.x,h+y,b.z+side*d/2,Math.max(.1,w*(1-y/1.6)),.19,.12);
+  if(!farm){for(let j=-w*.45;j<w*.5;j+=.75)for(const side of [-1,1]){const seam=q(g,'#6e8b8b',b.x+side*w*.25,h+.9,b.z+j*d/w,w*.55,.06,.045);seam.rotation.z=-side*Math.atan2(1.6,w/2);}q(g,'#9b8870',b.x+w*.28,h+1.4,b.z-d*.25,.8,2,.8);q(g,'#48605c',b.x+w*.28,h+2.45,b.z-d*.25,1,.15,1);for(const side of [-1,1]){q(solid,'#d3c7a5',b.x+side*(w/2-.12),h*.5,b.z-d/2-.03,.17,h,.13);q(solid,'#d3c7a5',b.x+side*(w/2-.12),h*.5,b.z+d/2+.03,.17,h,.13);}for(const side of [-1,1]){const xx=b.x+side*w*.3;q(solid,'#31565c',xx,h*.58,b.z-d/2-.04,w*.17,.75,.05);q(solid,'#c5bd97',xx,h*.58,b.z-d/2-.09,.06,.85,.07);q(solid,'#c5bd97',xx,h*.58,b.z-d/2-.09,w*.18,.06,.07);}}
   g.traverse(part=>part.userData.occluder=true);roofs.push({g,b});root.add(g);
   if(farm){for(const [x,z] of [[-w*.27,-d*.25],[w*.27,d*.25]]){q(solid,'#ac934c',b.x+x,.42,b.z+z,1.5,.84,1.1);q(solid,'#786336',b.x+x,.43,b.z+z,.09,.86,1.13);for(let k=0;k<6;k++)q(solid,'#c3ac65',b.x+x-.65+k*.25,.86,b.z+z,.07,.07,1.07);}}
  }

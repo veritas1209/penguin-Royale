@@ -112,7 +112,7 @@ export class RoomManager {
         this.db.deleteParty(saved.id);
         continue;
       }
-      const members = new Map(saved.members.map(({ id, username }) => [id, { id, username, connected: false }]));
+      const members = new Map(saved.members.map(({ id, username }) => [id, { id, username, connected: false, ready: false }]));
       const leaderId = members.has(saved.leader_id) ? saved.leader_id : members.keys().next().value;
       const room = { id: saved.id, code: saved.code, mode: 'coop', leaderId, status: 'lobby', raidId: null, offlineSince: this.now(), members };
       this.rooms.set(room.id, room);
@@ -129,11 +129,11 @@ export class RoomManager {
       leaderId: room.leaderId,
       status: room.status,
       raidId: room.raidId,
-      members: [...room.members.values()].map(({ id, username, connected }) => {
+      members: [...room.members.values()].map(({ id, username, connected, ready }) => {
         const profile = this.db.profile(id);
         const slot = ['primary', 'secondary', 'pistol', 'melee'].find((candidate) => profile.equipped?.[candidate]);
         return {
-          id, username, connected,
+          id, username, connected, ready: !!ready,
           weaponId: slot ? profile.equipped[slot] : null,
           weaponSlot: slot ?? null,
           weaponAttachments: slot ? profile.weaponAttachments?.[slot] ?? {} : {},
@@ -164,7 +164,7 @@ export class RoomManager {
       status: 'lobby',
       raidId: null,
       offlineSince: this.sockets.has(user.id) ? null : this.now(),
-      members: new Map([[user.id, { id: user.id, username: user.username, connected: this.sockets.has(user.id) }]]),
+      members: new Map([[user.id, { id: user.id, username: user.username, connected: this.sockets.has(user.id), ready: false }]]),
     };
     if (mode === 'coop') this.db.saveParty(room);
     this.rooms.set(room.id, room);
@@ -179,7 +179,8 @@ export class RoomManager {
     if (room.members.has(user.id)) return this.roomView(room);
     if (room.members.size >= 4) throw gameError('ROOM_FULL', 'Room is full');
     this.leaveRoom(user.id);
-    room.members.set(user.id, { id: user.id, username: user.username, connected: this.sockets.has(user.id) });
+    room.members.set(user.id, { id: user.id, username: user.username, connected: this.sockets.has(user.id), ready: false });
+    for (const member of room.members.values()) member.ready = false;
     this.db.saveParty(room);
     this.membership.set(user.id, room.id);
     this.broadcastRoom(room);
@@ -193,6 +194,7 @@ export class RoomManager {
     if (!room || room.status === 'raid') throw gameError('RAID_ACTIVE', 'Cannot leave an active raid');
     room.members.delete(userId);
     this.membership.delete(userId);
+    for (const member of room.members.values()) member.ready = false;
     if (room.members.size === 0) {
       if (room.mode === 'coop') this.db.deleteParty(room.id);
       this.rooms.delete(room.id);
@@ -203,12 +205,23 @@ export class RoomManager {
     }
   }
 
+  setReady(userId, ready) {
+    const room = this.rooms.get(this.membership.get(userId));
+    if (!room || room.mode !== 'coop') throw gameError('NO_ROOM', 'Join a co-op room first');
+    if (room.status !== 'lobby') throw gameError('ROOM_STATE', 'Room is not in the lobby');
+    if (typeof ready !== 'boolean') throw gameError('INVALID_READY', 'Ready must be true or false');
+    room.members.get(userId).ready = ready;
+    this.broadcastRoom(room);
+    return this.roomView(room);
+  }
+
   startRoom(userId) {
     const room = this.rooms.get(this.membership.get(userId));
     if (!room) throw gameError('NO_ROOM', 'Create or join a room first');
     if (room.leaderId !== userId) throw gameError('LEADER_ONLY', 'Only the room leader can start');
     if (room.status !== 'lobby') throw gameError('ROOM_STATE', 'Room is not in the lobby');
     if ([...room.members.values()].some((member) => !member.connected)) throw gameError('MEMBER_OFFLINE', 'Every member must be connected');
+    if (room.mode === 'coop' && [...room.members.values()].some((member) => !member.ready)) throw gameError('MEMBER_NOT_READY', 'Every member must be ready');
     const raidId = randomUUID();
     const ammoRequests = new Map();
     for (const memberId of room.members.keys()) {
@@ -269,7 +282,7 @@ export class RoomManager {
     const room = this.rooms.get(this.membership.get(userId));
     if (!room) return;
     const member = room.members.get(userId);
-    if (member) member.connected = false;
+    if (member) { member.connected = false; member.ready = false; }
     const raid = room.raidId && this.raids.get(room.raidId);
     if (raid) raid.disconnect(userId);
     else if ([...room.members.values()].every((candidate) => !candidate.connected)) room.offlineSince = this.now();
@@ -298,6 +311,7 @@ export class RoomManager {
         if (room.mode === 'coop') {
           room.status = 'lobby';
           room.raidId = null;
+          for (const member of room.members.values()) member.ready = false;
           room.offlineSince = [...room.members.values()].every((member) => !member.connected) ? now : null;
           this.broadcastRoom(room);
         } else {

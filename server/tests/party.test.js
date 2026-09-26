@@ -25,7 +25,9 @@ test('party keeps its roster, gear, and code across raids and server restart unt
     manager.attachSocket(alpha, socket());
     manager.attachSocket(beta, socket());
     const created = manager.createRoom(alpha, 'coop');
+    manager.setReady(alpha.id, true);
     const joined = manager.joinRoom(beta, created.code);
+    assert.equal(joined.members[0].ready, false);
     assert.equal(joined.members.length, 2);
     assert.equal(manager.joinRoom(alpha, created.code).members.length, 2);
     assert.equal(joined.members[1].weaponId, 'm416');
@@ -33,6 +35,11 @@ test('party keeps its roster, gear, and code across raids and server restart unt
     manager.broadcastCurrentRoom(beta.id);
     assert.equal(sent.filter(message => message.type === 'room').at(-1).room.members[1].weaponId, 'akm');
     for (let round = 0; round < 2; round++) {
+      assert.throws(() => manager.startRoom(alpha.id), { code: 'MEMBER_NOT_READY' });
+      manager.setReady(alpha.id, true);
+      assert.throws(() => manager.startRoom(alpha.id), { code: 'MEMBER_NOT_READY' });
+      manager.setReady(beta.id, true);
+      assert.equal(manager.current(alpha.id).room.members.every(member => member.ready), true);
       const raidId = manager.startRoom(alpha.id);
       assert.equal(manager.current(beta.id).room.id, created.id);
       now += 1000;
@@ -43,12 +50,14 @@ test('party keeps its roster, gear, and code across raids and server restart unt
       assert.equal(current.code, created.code);
       assert.equal(current.status, 'lobby');
       assert.equal(current.members.length, 2);
+      assert.equal(current.members.every(member => !member.ready), true);
     }
     db.close();
     db = new GameDatabase(path);
     manager = new RoomManager({ db, catalog, world, now: () => now });
     assert.equal(manager.current(alpha.id).room.code, created.code);
     assert.equal(manager.current(beta.id).room.members.length, 2);
+    assert.equal(manager.current(beta.id).room.members.every(member => !member.ready), true);
     manager.leaveRoom(alpha.id);
     assert.equal(manager.current(alpha.id).room, null);
     assert.equal(manager.current(beta.id).room.leaderId, beta.id);

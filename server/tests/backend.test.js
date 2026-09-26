@@ -108,6 +108,14 @@ test('two authenticated players join a co-op room and start one authoritative ra
     assert.match(created.json.room.code, /^[A-Z0-9]{6}$/);
     const joined = await request(state.base, '/api/rooms/join', { method: 'POST', cookie: beta.cookie, body: { code: created.json.room.code } });
     assert.equal(joined.json.room.members.length, 2);
+    const beforeReady = await request(state.base, '/api/rooms/start', { method: 'POST', cookie: alpha.cookie });
+    assert.equal(beforeReady.response.status, 409);
+    const alphaReady = await request(state.base, '/api/rooms/ready', { method: 'POST', cookie: alpha.cookie, body: { ready: true } });
+    assert.equal(alphaReady.json.room.members[0].ready, true);
+    const stillWaiting = await request(state.base, '/api/rooms/start', { method: 'POST', cookie: alpha.cookie });
+    assert.equal(stillWaiting.response.status, 409);
+    const betaReady = await request(state.base, '/api/rooms/ready', { method: 'POST', cookie: beta.cookie, body: { ready: true } });
+    assert.equal(betaReady.json.room.members.every(member => member.ready), true);
     const started = await request(state.base, '/api/rooms/start', { method: 'POST', cookie: alpha.cookie });
     assert.equal(started.response.status, 200, JSON.stringify(started.json));
     const raid = state.game.manager.raids.get(started.json.raidId);

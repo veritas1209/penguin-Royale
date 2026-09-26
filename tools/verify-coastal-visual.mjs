@@ -9,3 +9,10 @@ const gh=(g,c,x,y,z,w,h,d)=>{const m=mesh(g,c,x,y,z,new T.SphereGeometry(1,12,8)
 const _h=(g,c,x,y,z,r,h)=>mesh(g,c,x,y,z,new T.CylinderGeometry(r,r,h,20));
 const {__bcCoastalVisuals129:create}=await import('../src/coastalNuclearVisuals.js');
 const art=create(WORLD);art.update(0);art.update(21);let meshes=0;art.root.traverse(o=>{if(!o.isMesh)return;meshes++;const p=o.geometry.attributes.position;for(let i=0;i<p.array.length;i++)assert.ok(Number.isFinite(p.array[i]));});assert.ok(meshes>500);assert.ok(art.roofs.length>=14);console.log({meshes,fadeableRoofs:art.roofs.length});
+import {paintCoastalMap} from '../shared/coastalMap.js';
+const marks=[];const ctx=new Proxy({}, {get:(_,key)=>key==='arc'?((...args)=>marks.push(args)):(()=>{}),set:()=>true});
+paintCoastalMap(ctx,WORLD,x=>x,z=>z,1);paintCoastalMap(ctx,WORLD,x=>x,z=>z,1,true);
+for(const tower of WORLD.obstacles.filter(o=>o.kind==='cooling-tower'))assert.ok(marks.some(([x,z])=>x===tower.x&&z===tower.z));
+for(const mesh of art.root.children.filter(o=>o.material?.uniforms)){assert.equal(mesh.material.uniforms.time.value,21);assert.ok(mesh.material.fragmentShader.includes('distance'));}
+assert.equal(art.roofs.filter(({b})=>b.id.startsWith('hydro-')).length,6);
+art.dispose();
