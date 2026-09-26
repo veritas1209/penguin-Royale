@@ -9,6 +9,8 @@ graphics=(root/'training-graphics-runtime.js').read_text(encoding='utf8').replac
 graphics='\n'.join(line.rstrip(' \t') for line in graphics.splitlines()).rstrip('\n')+'\n'
 (assets/'training-graphics-runtime.js').write_text(graphics,encoding='utf8')
 shutil.copy2(root/'training-entry.js',assets/'training-entry.js')
+import runpy
+runpy.run_path(str(root/'generate-training-map.py'))
 controller=(root/'training-controller.js').read_text(encoding='utf8')
 for marker,filename in {
  '__DASH_SOUND_DATA__':'araya-issen.m4a',
