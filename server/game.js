@@ -37,6 +37,7 @@ import {createRaidAccessWorld,createAccessDoorStates,accessDoorSnapshots,removeA
 import {chooseRaidEntry,chooseFarthestExits,makeFlareExtraction,flareExtractionStatus,cancelExtractionOnHit} from './extractionRules.js';
 import {segmentObstacles} from './spatialObstacles.js';
 import {emitFirearmSound} from './firearmSound.js';
+import {trainingMap} from './trainingMaps.js';
 
 const TICK_MS = 50;
 const ENEMY_TICK_MS = 100;
@@ -106,6 +107,7 @@ export class RoomManager {
     this.rooms = new Map();
     this.membership = new Map();
     this.raids = new Map();
+    this.trainingSessions = new Map();
     this.sockets = new Map();
     for (const saved of this.db.loadParties?.() ?? []) {
       if (!saved.members.length) {
@@ -222,6 +224,7 @@ export class RoomManager {
     if (room.status !== 'lobby') throw gameError('ROOM_STATE', 'Room is not in the lobby');
     if ([...room.members.values()].some((member) => !member.connected)) throw gameError('MEMBER_OFFLINE', 'Every member must be connected');
     if (room.mode === 'coop' && [...room.members.values()].some((member) => !member.ready)) throw gameError('MEMBER_NOT_READY', 'Every member must be ready');
+    if([...room.members.keys()].some(id=>this.trainingSessions.has(id)))throw gameError('TRAINING_ACTIVE','훈련 중인 파티원이 있습니다.');
     const raidId = randomUUID();
     const ammoRequests = new Map();
     for (const memberId of room.members.keys()) {
@@ -254,6 +257,69 @@ export class RoomManager {
     return raidId;
   }
 
+  startTraining(user,mapId='warehouse-training') {
+    const map=trainingMap(mapId);
+    if(!map)throw gameError('INVALID_MAP','선택한 훈련장 맵을 찾을 수 없습니다.');
+    const normalRoom=this.rooms.get(this.membership.get(user.id));
+    if(normalRoom?.status==='raid')throw gameError('RAID_ACTIVE','진행 중인 원정을 먼저 끝내주세요.');
+    if(this.trainingSessions.has(user.id))throw gameError('TRAINING_ACTIVE','이미 훈련 중입니다.');
+    if(this.trainingSessions.size>=4)throw gameError('SERVER_BUSY','훈련장이 가득 찼습니다. 잠시 후 다시 시도해 주세요.');
+    const profile=this.db.profile(user.id);
+    if(!profile)throw gameError('UNAUTHENTICATED','계정을 찾을 수 없습니다.');
+    const equipped=profile.equipped??{};
+    if(!['primary','secondary','pistol','melee'].some(slot=>equipped[slot]))throw gameError('NO_WEAPON','무기를 먼저 장착해 주세요.');
+    const instances=new Map((profile.instances??[]).filter(item=>item.status==='equipped'&&item.slot).map(item=>[item.slot,item]));
+    const gear=Object.entries(equipped).filter(([,itemId])=>itemId).map(([slot,itemId])=>{
+      const instance=instances.get(slot);
+      return {slot,itemId,quantity:1,...(instance?{instanceId:instance.id,goldTraitLevels:instance.goldTraitLevels}:{})};
+    });
+    for(const stack of profile.packed??[])gear.push({slot:this.catalog.byId.get(stack.itemId)?.category==='ammo'?'ammo':'packed',itemId:stack.itemId,quantity:stack.quantity});
+    // Provide a finite practice allowance when the loadout has no matching rounds.
+    // Raid still uses the normal magazine, reload and reserve-ammo rules.
+    for(const slot of ['primary','secondary','pistol']){
+      const weapon=this.catalog.byId.get(equipped[slot]);
+      if(!weapon?.ammo||!this.catalog.byId.has(weapon.ammo))continue;
+      if(gear.some(stack=>stack.slot==='ammo'&&stack.itemId===weapon.ammo))continue;
+      gear.push({slot:'ammo',itemId:weapon.ammo,quantity:Math.max(1,weapon.magazine??10)*3});
+    }
+    const room={id:`training-${user.id}`,mode:'solo',leaderId:user.id,status:'raid',members:new Map([[user.id,{id:user.id,username:user.username,connected:this.sockets.has(user.id),ready:true}]])};
+    const trainingDb={profile:id=>this.db.profile(id),updateRaidLoot(){},updateRaidSecure(){},updateRaidInventoryState(){},updateRaidEquipment(){},markRaidCompleteIfSettled(){}};
+    const id=randomUUID();
+    const raid=new Raid({id,room,escrow:[{userId:user.id,gear,secure:(profile.securePacked??[]).map(stack=>({...stack}))}],db:trainingDb,catalog:this.catalog,world:map.world,now:this.now,emit:(message,recipients,reliable=false)=>this.emit(message,recipients,reliable),options:{...this.raidOptions,training:true,initialEnemyDelayMs:0,raidLimitMs:2*60*60_000}});
+    raid.trainingMapId=map.id;
+    this.trainingSessions.set(user.id,{raid});
+    this.emit({v:1,type:'raid_started',raidId:id,seed:raid.seed,startedAt:raid.startedAt,world:raid.world,playerId:user.id},[user.id],true);
+    return id;
+  }
+
+  trainingRaid(userId){return this.trainingSessions.get(userId)?.raid??null;}
+
+  setTrainingAi(userId,active){
+    const raid=this.trainingRaid(userId);
+    if(!raid)throw gameError('NO_ACTIVE_TRAINING','훈련 중이 아닙니다.');
+    raid.trainingAiActive=active===true;
+    if(!raid.trainingAiActive)for(const enemy of raid.enemies.values()){enemy.targetId=null;enemy.alertState='idle';}
+    raid.broadcastSnapshot(this.now());
+    return raid.trainingAiActive;
+  }
+
+  resetTrainingTargets(userId,type='mixed'){
+    const raid=this.trainingRaid(userId);
+    if(!raid)throw gameError('NO_ACTIVE_TRAINING','훈련 중이 아닙니다.');
+    if(!['mixed','normal','dps'].includes(type))throw gameError('INVALID_TRAINING_TYPE','시험 유형이 올바르지 않습니다.');
+    raid.world.enemySpawns=trainingMap(raid.trainingMapId).world.enemySpawns.filter(spawn=>type==='mixed'||(type==='dps')===Boolean(spawn.trainingImmortal));
+    raid.enemies.clear();raid.spawnWorld();
+    for(const enemy of raid.enemies.values())equipEnemy(raid,enemy,{kind:enemy.kind});
+    raid.trainingAiActive=false;
+    raid.broadcastSnapshot(this.now());
+    return raid.enemies.size;
+  }
+
+  exitTraining(userId){
+    if(!this.trainingSessions.has(userId))return;
+    this.trainingSessions.delete(userId);
+  }
+
   attachSocket(user, ws) {
     let sockets = this.sockets.get(user.id);
     const wasOffline = !sockets || sockets.size === 0;
@@ -262,6 +328,8 @@ export class RoomManager {
       this.sockets.set(user.id, sockets);
     }
     sockets.add(ws);
+    const training=this.trainingRaid(user.id);
+    if(training&&wasOffline)training.reconnect(user.id);
     const room = this.rooms.get(this.membership.get(user.id));
     if (room) {
       const member = room.members.get(user.id);
@@ -279,6 +347,8 @@ export class RoomManager {
     if (!sockets?.delete(ws)) return;
     if (sockets.size > 0) return;
     this.sockets.delete(userId);
+    const training=this.trainingRaid(userId);
+    if(training)training.disconnect(userId);
     const room = this.rooms.get(this.membership.get(userId));
     if (!room) return;
     const member = room.members.get(userId);
@@ -290,6 +360,8 @@ export class RoomManager {
   }
 
   handleCommand(userId, message) {
+    const training=this.trainingRaid(userId);
+    if(training){training.command(userId,message);return;}
     const room = this.rooms.get(this.membership.get(userId));
     const raid = room?.raidId && this.raids.get(room.raidId);
     if (!raid) throw gameError('NO_ACTIVE_RAID', 'No active raid');
@@ -297,6 +369,10 @@ export class RoomManager {
   }
 
   tick(now = this.now()) {
+    for(const [userId,session] of this.trainingSessions){
+      session.raid.tick(now);
+      if(session.raid.complete)this.trainingSessions.delete(userId);
+    }
     for (const [roomId, room] of this.rooms) {
       if (room.mode === 'coop') continue; // BC88 persistent party
       if (room.status !== 'lobby' || room.offlineSince == null || now - room.offlineSince < 5 * 60_000) continue;
@@ -392,7 +468,12 @@ export class Raid {
     this.spawnPlayers(escrow);
     this.spawnWorld();
     initBosses(this);
-    initEnemyForces(this);
+    if(this.options.training){
+      this.trainingAiActive=false;
+      this.majorResponses=new Map();
+      this.enemyForceSummary={baseOrdinary:this.enemies.size,reinforcements:0,multiplier:1,sniperIds:[]};
+      for(const enemy of this.enemies.values())equipEnemy(this,enemy,{kind:enemy.kind});
+    }else initEnemyForces(this);
     initGoldenBossEvent(this);
     initSquadPatrolEvent(this);
     const __bcTestRuntime =
@@ -483,12 +564,19 @@ export class Raid {
       commander: { hp: 270, speed: 2.0, damage: 26, attackMs: 950, armor: 0.35, rangedRange: 14 },
     };
     const enemySpawns = this.world.enemySpawns ?? [];
-    enemySpawns.forEach((spawn, index) => this.enemies.set(spawn.id ?? `enemy-${index}`, {
-      id: spawn.id ?? `enemy-${index}`, kind: spawn.kind ?? 'raider', x: spawn.x, z: spawn.z,
-      hp: (archetypes[spawn.kind] ?? archetypes.raider).hp, maxHp: (archetypes[spawn.kind] ?? archetypes.raider).hp,
-      ...archetypes[spawn.kind] ?? archetypes.raider, aggroRadius: spawn.radius ?? 8,
-      targetId: null, nextAttackAt: 0, stunnedUntil: 0,
-    }));
+    enemySpawns.forEach((spawn, index) => {
+      const enemy={
+        id: spawn.id ?? `enemy-${index}`, kind: spawn.kind ?? 'raider', x: spawn.x, z: spawn.z,
+        hp: (archetypes[spawn.kind] ?? archetypes.raider).hp, maxHp: (archetypes[spawn.kind] ?? archetypes.raider).hp,
+        ...archetypes[spawn.kind] ?? archetypes.raider, aggroRadius: spawn.radius ?? 8,
+        targetId: null, nextAttackAt: 0, stunnedUntil: 0,
+      };
+      if(this.options.training){
+        enemy.name=spawn.name??enemy.name;enemy.trainingImmortal=spawn.trainingImmortal===true;
+        if(enemy.trainingImmortal)enemy.hp=enemy.maxHp=1_000_000_000;
+      }
+      this.enemies.set(enemy.id,enemy);
+    });
     const radiationPasswordLetterBudget={remaining:1+(this.seed&1)};
     const radiationWeaponSpawns=planRadiationWeaponSpawns(this.world,this.world.lootSpawns??[],this.seed);
     (this.world.lootSpawns??[]).forEach((spawn,index)=>{
@@ -2192,6 +2280,7 @@ player.input={
   }
 
   updateEnemies(dt, now) {
+    if(this.options.training&&!this.trainingAiActive)return;
     /* BC ARAYA BURN 62 */
     for(const enemy of this.enemies.values()){
       /* BC ARAYA EFFECTIVE CAP 68 */
@@ -2260,7 +2349,7 @@ player.input={
     this.enemyUpdateCursor=offset+1;
     for(let index=0;index<enemies.length;index++){
       const enemy=enemies[(index+offset)%enemies.length];
-      if(isVirtualResponseEnemy(enemy))continue;
+      if(isVirtualResponseEnemy(enemy)||enemy.trainingImmortal)continue;
       const preLeashGoal=enemyLeashGoal(enemy);
       if(!enemy.responsePlatoonId&&!preLeashGoal&&!activePlayers.some(player=>distance(enemy,player)<=AI_ACTIVE_RADIUS)){enemy.targetId=null;continue;}
       activeEnemies.push(enemy);
@@ -2481,6 +2570,11 @@ player.input={
        (1-goldReduction)-
        flat
       );
+    if(this.options.training&&enemy.trainingImmortal){
+      enemy.lastHitAt=this.now();
+      this.event('hit',{playerId:player?.id,enemyId:enemy.id,weaponId,damage:Math.round(applied),hp:enemy.hp});
+      return;
+    }
     enemy.hp -= applied; enemy.lastHitAt=this.now(); enemy.healEndsAt=null;
     if(player&&!['fire','ammo-incendiary'].includes(weaponId)){forceEnemyThreat(enemy,player,this.now());broadcastEnemyThreat(this,enemy,player,this.now());}
     this.event('hit', { playerId: player?.id, enemyId: enemy.id, weaponId, damage: Math.round(applied), hp: Math.max(0, enemy.hp) });
@@ -2609,6 +2703,13 @@ player.input={
   }
 
   settle(player, outcome, now) {
+    if(this.options.training){
+      if(player.settlementResult)return {...player.settlementResult,applied:false};
+      const result={applied:true,outcome,lossReport:null};
+      player.settlement=outcome;player.settlementResult=result;player.alive=outcome==='extracted';
+      this.event('settled',{playerId:player.id,outcome,applied:true});
+      return result;
+    }
     if(player.settlementResult)return {...player.settlementResult,applied:false};
 
     /*
@@ -2926,6 +3027,7 @@ const result=this.db.settleRaidPlayer(this.id,player.id,outcome,returnedGear,out
     const visiblePlayers=[...this.players.values()]; // Squad positions and health must remain visible across the full map.
     return {
       v: 1, type: 'snapshot', id: snapshotId, serverTime: now,
+      ...(this.options.training?{world:this.world}:{}),
       raid: { id: this.id, phase: this.complete ? 'complete' : 'active', elapsedMs: now - this.startedAt },
       players: visiblePlayers.map((player) => ({
         id: player.id, username: player.username, x: player.x, z: player.z, yaw: player.yaw,

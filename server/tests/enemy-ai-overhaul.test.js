@@ -302,3 +302,18 @@ test('response squad keeps independent tactical roles and destinations around on
  assert.equal(goals.filter(({enemy})=>enemy.tacticalRole==='breach').length,1);
  assert.ok(goals.every(({point})=>Math.hypot(point.x-player.x,point.z-player.z)>=8));
 });
+
+test('response squad loadouts vary by raid while keeping elite grade limits',()=>{
+ const signatures=new Set();
+ for(let index=0;index<8;index++){
+  // Force initialization uses the raid id, so construct each raid with a distinct id.
+  const room={mode:'solo',members:new Map([['p',{username:'p'}]])};
+  const distinct=new Raid({id:`response-${index}`,room,escrow:[{userId:'p',gear:[]}],db,catalog,world:WORLD,now:()=>1000,emit(){},options:{}});
+  const squad=[...distinct.enemies.values()].filter(enemy=>enemy.responsePlatoonId).sort((a,b)=>a.responseSlot-b.responseSlot);
+  assert.equal(squad.length,5);
+  assert.ok(squad.filter(enemy=>catalog.byId.get(enemy.weaponId).quality==='refined').length<=2);
+  assert.ok(squad.filter(enemy=>enemy.armorTier===6).length<=3);
+  signatures.add(squad.map(enemy=>`${enemy.weaponId}:${enemy.armorTier}`).join('|'));
+ }
+ assert.ok(signatures.size>1,'each raid must not receive the same fixed squad equipment');
+});

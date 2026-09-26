@@ -539,10 +539,18 @@ function deployResponse(raid,state,now){
   const origin=responseFormationPoint(state,i,2.5),point=safePoint(raid,origin,id,{radii:[0,1.5,3,5],minimumPlayerDistance:10,minimumEnemyDistance:1})??origin;
   const enemy={id,name:sniper?'대응 소대 저격수':'대응 소대 전투원',...ordinaryTemplate(kind,point.x,point.z,now),responsePlatoonId:state.id,responseSlot:i,responseVirtual:true,homeX:point.x,homeZ:point.z};
   enemy.hp+=30;enemy.maxHp+=30;
-  const armorTier=i<3?6:5,refined=sniper||i===0;
-  const responseBase=sniper?'m24':refined?'mk14':([null,'mg3','groza','beryl-m762'][i]??'groza');
-  const responseQuality=ENEMY_WEAPON_QUALITIES.elite[i%ENEMY_WEAPON_QUALITIES.elite.length];
-  const responseWeaponId=`${responseBase}-${responseQuality}`;
+  // Roll once per raid and role; a squad keeps its loadout during that raid.
+  const weaponBases=sniper?['m24','awm','slr','mk12','kar98k']
+   :kind==='heavy'?['mk14','m249','mg3','dp-28','slr']
+   :['groza','beryl-m762','m416','aug','scar-l'];
+  const qualityOffset=hash(`${raid.id}:response-quality-offset`)%RESPONSE_PLATOON_SIZE;
+  const armorOffset=hash(`${raid.id}:response-armor-offset`)%RESPONSE_PLATOON_SIZE;
+  const responseQuality=(i+qualityOffset)%RESPONSE_PLATOON_SIZE<2?'refined':'improved';
+  const candidates=weaponBases.map(base=>`${base}-${responseQuality}`)
+   .filter(id=>raid.catalog.byId.has(id));
+  const weaponIndex=hash(`${raid.id}:${id}:response-weapon`)%candidates.length;
+  const responseWeaponId=candidates[weaponIndex];
+  const armorTier=(i+armorOffset)%RESPONSE_PLATOON_SIZE<3?6:5;
   equipEnemy(raid,enemy,sniper
    ?{kind:'sniper',scopeId:'scope-8x',armorTier,weaponId:responseWeaponId}
    :{kind,armorTier,weaponId:responseWeaponId}

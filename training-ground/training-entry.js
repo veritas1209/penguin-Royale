@@ -2,6 +2,8 @@
 'use strict';
 const base='/games/penguin-extraction';
 const mapImage='assets/training-map.svg?v=136';
+const mapOptions=[{id:'arctic',name:'아틱 베이스',kind:'raid'},{id:'warehouse-training',name:'창고 훈련장',kind:'training',image:mapImage}];
+const selectedMap=()=>mapOptions.find(map=>map.id===selected)??mapOptions[0];
 let selected='arctic',mountedPanel=null,controller=null;
 const style=document.createElement('style');
 style.textContent=[
@@ -26,7 +28,12 @@ style.textContent=[
 '.training-map-dialog button{width:34px;height:34px;color:#eff0d9;background:#2d5049;border:1px solid #79978c;cursor:pointer;font-size:25px}',
 '.training-map-dialog img{display:block;width:100%;max-height:calc(100dvh - 125px);object-fit:contain;background:#183538}',
 '.training-error{margin:9px 0 0;color:#f1c2a4;font-size:11px;line-height:1.4}',
-'.training-error[hidden]{display:none}'
+'.training-error[hidden]{display:none}',
+'#training-controls{position:fixed;right:18px;top:332px;z-index:90;display:grid;gap:7px;width:176px;padding:11px;background:#193b37e8;border:1px solid #729087;color:#e7ebd4;box-shadow:0 10px 24px #10242166}',
+'#training-controls select,#training-controls button{min-height:34px;padding:6px 9px;color:#edf0dd;background:#31534d;border:1px solid #708e83;cursor:pointer;font-size:12px}',
+'#training-controls label{font-size:11px;color:#c8d6c8}',
+'#training-controls [data-training=exit]{background:#213d3b}',
+ '@media(max-width:700px){#training-controls{right:8px;top:255px;width:145px;padding:7px}}'
 ].join('');
 document.head.append(style);
 function openMap(trigger){
@@ -56,7 +63,11 @@ async function startTraining(button,error){
   const data=await me.json(),state=await room.json();
   if(state.room?.status==='raid')throw Error('진행 중인 원정이 끝난 뒤 시작할 수 있습니다.');
   if(!['primary','secondary','pistol','melee'].some(slot=>data.profile?.equipped?.[slot]))throw Error('무기를 먼저 장착해 주세요.');
-  location.href=base+'/training.html?v=138';
+  const started=await fetch(base+'/api/training/start',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({mapId:selectedMap().id})});
+  const result=await started.json();
+  if(!started.ok)throw Error(result.error?.message||'훈련 세션을 시작할 수 없습니다.');
+  sessionStorage.setItem('bluecap-training-raid',result.raidId);
+  ensureTrainingHud();
  }catch(e){
   button.disabled=false;
   button.innerHTML=label;
@@ -64,7 +75,44 @@ async function startTraining(button,error){
   error.hidden=false;
  }
 }
+async function trainingApi(path,body={}){
+ const response=await fetch(base+'/api/training/'+path,{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+ const data=await response.json();
+ if(!response.ok)throw Error(data.error?.message||'훈련 명령을 처리하지 못했습니다.');
+ return data;
+}
+function ensureTrainingHud(){
+ if(!sessionStorage.getItem('bluecap-training-raid')||!document.querySelector('#app.in-raid'))return;
+ if(document.querySelector('#training-controls'))return;
+ const panel=document.createElement('section');
+ panel.id='training-controls';panel.setAttribute('aria-label','훈련장 조작');
+ panel.innerHTML='<label for="training-type">시험 유형</label><select id="training-type"><option value="mixed">일반 적 + DPS</option><option value="normal">일반 적</option><option value="dps">무적 DPS</option></select><button type="button" data-training="ai">AI 동작</button><button type="button" data-training="reset">표적 초기화</button><button type="button" data-training="exit">나가기</button>';
+ panel.addEventListener('click',async event=>{
+  const button=event.target.closest('[data-training]');if(!button||button.disabled)return;
+  button.disabled=true;
+  try{
+   if(button.dataset.training==='ai'){
+    const active=button.dataset.active!=='true';
+    const result=await trainingApi('ai',{active});
+    button.dataset.active=String(result.aiActive);button.textContent=result.aiActive?'AI 정지':'AI 동작';
+   }else if(button.dataset.training==='reset'){
+    await trainingApi('reset',{type:panel.querySelector('#training-type').value});
+    const ai=panel.querySelector('[data-training=ai]');ai.dataset.active='false';ai.textContent='AI 동작';
+   }else{
+    await trainingApi('exit');sessionStorage.removeItem('bluecap-training-raid');location.href=base+'/';
+   }
+  }catch(error){console.error(error);window.alert(error.message||'훈련 명령 오류');}
+  finally{button.disabled=false;}
+ });
+ panel.querySelector('#training-type').addEventListener('change',async event=>{
+  const type=event.target.value;
+  try{await trainingApi('reset',{type});const ai=panel.querySelector('[data-training=ai]');ai.dataset.active='false';ai.textContent='AI 동작';}
+  catch(error){console.error(error);window.alert(error.message||'시험 유형 변경 오류');}
+ });
+ document.body.append(panel);
+}
 function mount(){
+ ensureTrainingHud();
  const panel=document.querySelector('.sortie-panel');
  if(!panel||panel===mountedPanel)return;
  controller?.abort();
@@ -82,7 +130,7 @@ function mount(){
  heading.append(title);
  const picker=document.createElement('div');
  picker.className='training-map-picker';
- picker.innerHTML='<button type="button" class="training-map-toggle" aria-haspopup="listbox" aria-expanded="false">맵 선택 ▾</button><div class="training-map-menu" role="listbox" hidden><button type="button" role="option" data-map="arctic">아틱 베이스</button><button type="button" role="option" data-map="training">창고 훈련장</button></div>';
+ picker.innerHTML='<button type="button" class="training-map-toggle" aria-haspopup="listbox" aria-expanded="false">맵 선택 ▾</button><div class="training-map-menu" role="listbox" hidden>'+mapOptions.map(option=>'<button type="button" role="option" data-map="'+option.id+'">'+option.name+'</button>').join('')+'</div>';
  heading.append(picker);
  const toggle=picker.querySelector('.training-map-toggle'),menu=picker.querySelector('.training-map-menu');
  const fallback=document.createElement('button');
@@ -96,12 +144,12 @@ function mount(){
  panel.append(error);
  const closeMenu=()=>{menu.hidden=true;toggle.setAttribute('aria-expanded','false');};
  const update=()=>{
-  const training=selected==='training';
+  const choice=selectedMap(),training=choice.kind==='training';
   panel.classList.toggle('training-selected',training);
-  title.textContent=training?'창고 훈련장':'아틱 베이스';
+  title.textContent=choice.name;
   if(eyebrow)eyebrow.textContent=training?'TRAINING':originalEyebrow;
-  map.innerHTML=training?'<img class="training-map-art" src="'+mapImage+'" alt="창고 훈련장 배치도">':originalMap;
-  map.setAttribute('aria-label',training?'창고 훈련장 전체 지도 보기':originalAria||'아틱 베이스 전체 지도 보기');
+  map.innerHTML=training?'<img class="training-map-art" src="'+choice.image+'" alt="'+choice.name+' 배치도">':originalMap;
+  map.setAttribute('aria-label',training?choice.name+' 전체 지도 보기':originalAria||'아틱 베이스 전체 지도 보기');
   if(launch)launch.innerHTML=training?'훈련 시작 <span>→</span>':originalLaunch;
   fallback.style.display=training&&!launch?'block':'none';
   for(const option of menu.querySelectorAll('[data-map]'))option.setAttribute('aria-selected',String(option.dataset.map===selected));
@@ -118,13 +166,13 @@ function mount(){
  document.addEventListener('pointerdown',e=>{if(!picker.contains(e.target))closeMenu();},{signal});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();},{signal});
  map.addEventListener('click',e=>{
-  if(selected!=='training')return;
+  if(selectedMap().kind!=='training')return;
   e.preventDefault();
   e.stopImmediatePropagation();
   openMap(map);
  },{capture:true,signal});
  if(launch)launch.addEventListener('click',e=>{
-  if(selected!=='training')return;
+  if(selectedMap().kind!=='training')return;
   e.preventDefault();
   e.stopImmediatePropagation();
   startTraining(launch,error);
@@ -133,5 +181,6 @@ function mount(){
  update();
 }
 new MutationObserver(mount).observe(document.body,{childList:true,subtree:true});
+fetch(base+'/api/training/current',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).then(data=>{if(!data?.active)sessionStorage.removeItem('bluecap-training-raid');else{sessionStorage.setItem('bluecap-training-raid','active');ensureTrainingHud();}}).catch(()=>{});
 mount();
 })();
