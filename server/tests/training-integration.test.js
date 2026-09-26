@@ -74,3 +74,24 @@ test('training rejects unknown maps without opening a session',()=>{
  assert.throws(()=>manager.startTraining(user,'missing-map'),error=>error.code==='INVALID_MAP');
  assert.equal(manager.trainingRaid(user.id),null);
 });
+
+test('training DPS reports rolling damage from the immortal target and resets',()=>{
+ const state=setup(),{manager,user}=state;
+ manager.startTraining(user);
+ const raid=manager.trainingRaid(user.id);
+ manager.resetTrainingTargets(user.id,'dps');
+ const dummy=raid.enemies.get('training-dps'),player=raid.players.get(user.id);
+ raid.damageEnemy(player,dummy,125,'m416-repaired');
+ const firstApplied=raid.trainingDamage.total;
+ assert.ok(firstApplied>0&&firstApplied<125,'DPS uses damage after target armor');
+ assert.deepEqual(manager.trainingStats(user.id),{dps:Math.round(firstApplied),total:Math.round(firstApplied)});
+ state.advance(2000);
+ raid.damageEnemy(player,dummy,75,'m416-repaired');
+ const totalApplied=raid.trainingDamage.total;
+ assert.ok(totalApplied>firstApplied);
+ assert.deepEqual(manager.trainingStats(user.id),{dps:Math.round(totalApplied/2),total:Math.round(totalApplied)});
+ state.advance(5000);
+ assert.deepEqual(manager.trainingStats(user.id),{dps:0,total:Math.round(totalApplied)});
+ manager.resetTrainingTargets(user.id,'dps');
+ assert.deepEqual(manager.trainingStats(user.id),{dps:0,total:0});
+});

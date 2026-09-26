@@ -309,10 +309,23 @@ export class RoomManager {
     if(!['mixed','normal','dps'].includes(type))throw gameError('INVALID_TRAINING_TYPE','시험 유형이 올바르지 않습니다.');
     raid.world.enemySpawns=trainingMap(raid.trainingMapId).world.enemySpawns.filter(spawn=>type==='mixed'||(type==='dps')===Boolean(spawn.trainingImmortal));
     raid.enemies.clear();raid.spawnWorld();
+    raid.trainingDamage={total:0,firstHitAt:0,hits:[]};
     for(const enemy of raid.enemies.values())equipEnemy(raid,enemy,{kind:enemy.kind});
     raid.trainingAiActive=false;
     raid.broadcastSnapshot(this.now());
     return raid.enemies.size;
+  }
+
+  trainingStats(userId){
+    const raid=this.trainingRaid(userId);
+    if(!raid)return {dps:0,total:0};
+    const damage=raid.trainingDamage;
+    if(!damage)return {dps:0,total:0};
+    const now=this.now(),windowMs=5000;
+    damage.hits=damage.hits.filter(hit=>now-hit.at<windowMs);
+    const rolling=damage.hits.reduce((sum,hit)=>sum+hit.damage,0);
+    const elapsed=Math.min(windowMs,Math.max(1000,now-damage.firstHitAt));
+    return {dps:Math.round(rolling*1000/elapsed),total:Math.round(damage.total)};
   }
 
   exitTraining(userId){
@@ -470,6 +483,7 @@ export class Raid {
     initBosses(this);
     if(this.options.training){
       this.trainingAiActive=false;
+      this.trainingDamage={total:0,firstHitAt:0,hits:[]};
       this.majorResponses=new Map();
       this.enemyForceSummary={baseOrdinary:this.enemies.size,reinforcements:0,multiplier:1,sniperIds:[]};
       for(const enemy of this.enemies.values())equipEnemy(this,enemy,{kind:enemy.kind});
@@ -2571,7 +2585,12 @@ player.input={
        flat
       );
     if(this.options.training&&enemy.trainingImmortal){
-      enemy.lastHitAt=this.now();
+      const hitAt=this.now();
+      enemy.lastHitAt=hitAt;
+      if(!this.trainingDamage.firstHitAt)this.trainingDamage.firstHitAt=hitAt;
+      this.trainingDamage.total+=applied;
+      this.trainingDamage.hits.push({at:hitAt,damage:applied});
+      this.trainingDamage.hits=this.trainingDamage.hits.filter(hit=>hitAt-hit.at<5000);
       this.event('hit',{playerId:player?.id,enemyId:enemy.id,weaponId,damage:Math.round(applied),hp:enemy.hp});
       return;
     }

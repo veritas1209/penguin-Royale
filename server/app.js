@@ -293,7 +293,7 @@ async function route(request, response, context) {
   if (request.method === 'POST' && path === '/api/rooms/leave') { context.manager.leaveRoom(user.id); return send(response, 200, { ok: true }); }
   if (request.method === 'POST' && path === '/api/rooms/start') return send(response, 200, { ok: true, raidId: context.manager.startRoom(user.id) });
   if (request.method === 'POST' && path === '/api/training/start') { const body=await readJson(request); return send(response, 200, { ok: true, raidId: context.manager.startTraining(user,body.mapId??'warehouse-training') }); }
-  if (request.method === 'GET' && path === '/api/training/current') return send(response, 200, { ok: true, active: !!context.manager.trainingRaid(user.id), aiActive: context.manager.trainingRaid(user.id)?.trainingAiActive??false });
+  if (request.method === 'GET' && path === '/api/training/current') return send(response, 200, { ok: true, active: !!context.manager.trainingRaid(user.id), aiActive: context.manager.trainingRaid(user.id)?.trainingAiActive??false, stats:context.manager.trainingStats(user.id) });
   if (request.method === 'POST' && path === '/api/training/ai') {
     const body=await readJson(request);
     if(typeof body.active!=='boolean')throw gameError('INVALID_TRAINING_AI','AI 상태를 지정해 주세요.');

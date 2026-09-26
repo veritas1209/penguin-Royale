@@ -32,6 +32,8 @@ style.textContent=[
 '#training-controls{position:fixed;right:18px;top:332px;z-index:90;display:grid;gap:7px;width:176px;padding:11px;background:#193b37e8;border:1px solid #729087;color:#e7ebd4;box-shadow:0 10px 24px #10242166}',
 '#training-controls select,#training-controls button{min-height:34px;padding:6px 9px;color:#edf0dd;background:#31534d;border:1px solid #708e83;cursor:pointer;font-size:12px}',
 '#training-controls label{font-size:11px;color:#c8d6c8}',
+'#training-dps{display:block;padding:8px 9px;border:1px solid #708e8355;background:#102f2dcc;color:#e9d497;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}',
+'#training-dps small{display:block;margin-top:3px;color:#bfd0c4;font-size:10px;font-weight:500}',
 '#training-controls [data-training=exit]{background:#213d3b}',
  '@media(max-width:700px){#training-controls{right:8px;top:255px;width:145px;padding:7px}}'
 ].join('');
@@ -81,12 +83,38 @@ async function trainingApi(path,body={}){
  if(!response.ok)throw Error(data.error?.message||'훈련 명령을 처리하지 못했습니다.');
  return data;
 }
+function releaseTrainingMovement(){
+ for(const code of ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight','Space'])
+  window.dispatchEvent(new KeyboardEvent('keyup',{code,bubbles:true}));
+ window.dispatchEvent(new Event('blur'));
+}
 function ensureTrainingHud(){
  if(!sessionStorage.getItem('bluecap-training-raid')||!document.querySelector('#app.in-raid'))return;
+ const locationLabel=document.querySelector('.raid-location');
+ const heading=locationLabel?.querySelector('.eyebrow'),name=locationLabel?.querySelector('strong');
+ if(heading&&heading.textContent!=='TRAINING GROUND / LIVE SESSION')heading.textContent='TRAINING GROUND / LIVE SESSION';
+ if(name&&name.textContent!=='훈련장')name.textContent='훈련장';
  if(document.querySelector('#training-controls'))return;
  const panel=document.createElement('section');
  panel.id='training-controls';panel.setAttribute('aria-label','훈련장 조작');
- panel.innerHTML='<label for="training-type">시험 유형</label><select id="training-type"><option value="mixed">일반 적 + DPS</option><option value="normal">일반 적</option><option value="dps">무적 DPS</option></select><button type="button" data-training="ai">AI 동작</button><button type="button" data-training="reset">표적 초기화</button><button type="button" data-training="exit">나가기</button>';
+ panel.innerHTML='<label for="training-type">시험 유형</label><select id="training-type"><option value="mixed">일반 적 + DPS</option><option value="normal">일반 적</option><option value="dps">무적 DPS</option></select><output id="training-dps" aria-live="off">0 DPS<small>무적 표적 · 누적 피해 0</small></output><button type="button" data-training="ai">AI 동작</button><button type="button" data-training="reset">표적 초기화</button><button type="button" data-training="exit">나가기</button>';
+ panel.addEventListener('pointerdown',releaseTrainingMovement,{capture:true});
+ panel.addEventListener('focusin',releaseTrainingMovement,{capture:true});
+ panel.addEventListener('change',releaseTrainingMovement,{capture:true});
+ let statsPending=false;
+ const updateDps=stats=>{
+  const output=panel.querySelector('#training-dps');
+  if(output)output.innerHTML=Math.max(0,stats?.dps??0).toLocaleString()+' DPS<small>무적 표적 · 누적 피해 '+Math.max(0,stats?.total??0).toLocaleString()+'</small>';
+ };
+ const statsTimer=setInterval(async()=>{
+  if(!panel.isConnected){clearInterval(statsTimer);return;}
+  if(statsPending)return;statsPending=true;
+  try{
+   const response=await fetch(base+'/api/training/current',{credentials:'same-origin'});
+   if(response.ok)updateDps((await response.json()).stats);
+  }catch(error){console.warn('Training DPS refresh failed',error);}
+  finally{statsPending=false;}
+ },500);
  panel.addEventListener('click',async event=>{
   const button=event.target.closest('[data-training]');if(!button||button.disabled)return;
   button.disabled=true;
@@ -97,6 +125,7 @@ function ensureTrainingHud(){
     button.dataset.active=String(result.aiActive);button.textContent=result.aiActive?'AI 정지':'AI 동작';
    }else if(button.dataset.training==='reset'){
     await trainingApi('reset',{type:panel.querySelector('#training-type').value});
+    updateDps({dps:0,total:0});
     const ai=panel.querySelector('[data-training=ai]');ai.dataset.active='false';ai.textContent='AI 동작';
    }else{
     await trainingApi('exit');sessionStorage.removeItem('bluecap-training-raid');location.href=base+'/';
@@ -106,8 +135,10 @@ function ensureTrainingHud(){
  });
  panel.querySelector('#training-type').addEventListener('change',async event=>{
   const type=event.target.value;
-  try{await trainingApi('reset',{type});const ai=panel.querySelector('[data-training=ai]');ai.dataset.active='false';ai.textContent='AI 동작';}
-  catch(error){console.error(error);window.alert(error.message||'시험 유형 변경 오류');}
+  try{
+   await trainingApi('reset',{type});updateDps({dps:0,total:0});
+   const ai=panel.querySelector('[data-training=ai]');ai.dataset.active='false';ai.textContent='AI 동작';
+  }catch(error){console.error(error);window.alert(error.message||'시험 유형 변경 오류');}
  });
  document.body.append(panel);
 }
