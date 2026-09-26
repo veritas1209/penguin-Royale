@@ -24,14 +24,13 @@ for marker,filename in {
 (assets/'training-controller-live.js').write_text(controller,encoding='utf8')
 shell=(root/'training-shell.html').read_text(encoding='utf8')
 shell=shell.replace('BLUECAP / OFFLINE COMBAT RANGE','BLUECAP / COMBAT TRAINING')
-shell=shell.replace('<aside class="panel">','<aside class="panel"><div id="live-controls"><h2>훈련 설정</h2></div>')
-shell=shell.replace('</header>','<a class="live-return" href="/games/penguin-extraction/">← 은신처 돌아가기</a></header>',1)
+shell=shell.replace('<aside class="panel">','<aside class="panel"><div id="live-controls"><div class="live-panel-head"><h2>훈련 설정</h2><a class="training-exit" href="/games/penguin-extraction/">나가기 ×</a></div></div>')
 shell=shell.replace('</style>', '''
 .panel>.section,.panel>.note{display:none!important}.panel{height:auto!important;bottom:auto!important;max-height:none!important}
 #live-controls{display:grid;gap:15px}#live-controls h2{margin:0;font-size:18px;color:#ffdc91}
 #live-controls .row{display:grid;gap:8px}#live-controls select,#live-controls button{width:100%;padding:11px;background:#253f42;color:#f2e9cf;border:1px solid #739088;border-radius:4px;font-size:14px}
 #live-controls button{cursor:pointer;background:#d5a954;color:#1d3534;font-weight:bold}
-.live-return{display:block;margin-top:14px;color:#eacb7b;text-decoration:none;font-size:12px}
+.live-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.live-panel-head h2{margin:0}.training-exit{display:block;padding:7px 9px;color:#eacb7b;border:1px solid #7b9386;text-decoration:none;font-size:12px;font-weight:700}.training-exit:hover,.training-exit:focus-visible{background:#35534b;color:#fff2ca}
 </style>''')
 bootstrap='''<script>window.__peAudio={gunshot:()=>{}};</script>
 <script src="assets/weapon-audio-30.js"></script><script src="assets/weapon-audio-map-28.js"></script>
@@ -59,7 +58,7 @@ bootstrap='''<script>window.__peAudio={gunshot:()=>{}};</script>
   window.__LIVE_TRAINING__={weapons,username:me.user?.username||''};
   const controls=document.getElementById('live-controls');
   controls.append(document.getElementById('ai-mode').closest('label'),document.getElementById('reset'));
-  const script=document.createElement('script');script.src='assets/training-controller-live.js';document.body.append(script);
+  const script=document.createElement('script');script.src='assets/training-controller-live.js?v=137';document.body.append(script);
  }catch(error){const status=document.getElementById('status');status.textContent=String(error.message||error);status.classList.add('error');}
 })();
 </script>'''

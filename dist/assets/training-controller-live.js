@@ -127,7 +127,6 @@
       }
     }
     updateLabels();
-    updateTargetLabels();
   }
   function select(index){
     cancelDashTarget();
@@ -181,7 +180,7 @@
     view.directionAim(0,-1);
     kills=0;damageDone=0;playerHp=100;lastShot=0;time=0;running=true;aiAccumulator=0;aiMs=0;aiPeakMs=0;aiChecks=0;
     select(selected);
-    status.textContent=liveTraining?"장착 장비로 훈련 중 · 탄약과 아이템은 저장되지 않습니다":"로컬 3D 훈련장 · 연결 없이 실행 중";
+    status.textContent=liveTraining?"훈련 중":"로컬 3D 훈련장 · 연결 없이 실행 중";
     status.classList.remove("error");
     log("창고 맵 · 표적 "+count+"개와 무적 DPS 표적 배치 완료");
     updateSkillHud();
@@ -711,17 +710,51 @@
     const buff=w.id==="legend-karambit"&&now<karambitBuffUntil?"초가속 "+((karambitBuffUntil-now)/1000).toFixed(1)+"초":"";
     $("skill-buff").textContent=buff;
   }
+  const targetLabels=new Map();
+  function ensureTargetLabel(id){
+    let label=targetLabels.get(id);
+    if(label)return label;
+    const root=document.createElement("span");
+    root.className="world-label enemy-health";
+    root.style.display="none";
+    const name=document.createElement("b");
+    const track=document.createElement("i");
+    const fill=document.createElement("em");
+    const value=document.createElement("small");
+    track.append(fill);
+    root.append(name,track,value);
+    $("target-labels").append(root);
+    label={root,name,fill,value};
+    targetLabels.set(id,label);
+    return label;
+  }
   function updateTargetLabels(){
-    const holder=$("target-labels");
-    if(!view||!view.camera)return;
-    holder.innerHTML=enemies.filter((e)=>e.hp>0).map((e)=>{
-      const point=new V(e.x,2.7,e.z).project(view.camera);
-      if(point.z>1||point.z< -1)return "";
-      const left=(point.x+1)*50;
-      const top=(1-point.y)*50;
-      if(left<0||left>100||top<0||top>100)return "";
-      return '<div class="target-label" style="left:'+left+'%;top:'+top+'%"><b>'+e.name+'</b><span>'+(e.frozenUntil>performance.now()?"빙결 "+((e.frozenUntil-performance.now())/1000).toFixed(1)+"초 · ":"")+(e.immortal?"무한 체력":Math.ceil(e.hp)+" / "+e.maxHp)+'</span><i><em style="width:'+(e.immortal?100:100*e.hp/e.maxHp)+'%"></em></i></div>';
-    }).join("");
+    if(!view?.camera)return;
+    const active=new Set(),canvas=view.renderer.domElement;
+    for(const enemy of enemies){
+      if(enemy.hp<=0)continue;
+      const actor=view.actorMap.get(enemy.id);
+      if(!actor)continue;
+      const pos=actor.root.position.clone();
+      pos.y+=2.65;
+      pos.project(view.camera);
+      const label=ensureTargetLabel(enemy.id);
+      if(Math.abs(pos.x)>=.96||Math.abs(pos.y)>=.9||pos.z< -1||pos.z>1){
+        label.root.style.display="none";
+        continue;
+      }
+      active.add(enemy.id);
+      const x=(pos.x*.5+.5)*canvas.clientWidth;
+      const y=(pos.y*-.5+.5)*canvas.clientHeight;
+      label.root.style.display="";
+      label.root.style.transform="translate3d("+x+"px,"+y+"px,0) translate(-50%,-50%)";
+      label.root.style.zIndex=String(((-pos.z*.5+.5)*100000)|0);
+      if(label.name.textContent!==enemy.name)label.name.textContent=enemy.name;
+      const value=enemy.immortal?"∞":Math.ceil(enemy.hp)+" / "+Math.ceil(enemy.maxHp);
+      if(label.value.textContent!==value)label.value.textContent=value;
+      label.fill.style.width=(enemy.immortal?100:Math.max(0,Math.min(100,enemy.hp/Math.max(1,enemy.maxHp)*100)))+"%";
+    }
+    for(const [id,label] of targetLabels)if(!active.has(id))label.root.style.display="none";
   }
   function updateDps(now){
     dpsEvents=dpsEvents.filter(event=>now-event.at<=5000);
@@ -843,6 +876,7 @@
           actor.root.position.y=.75*Math.sin(Math.PI*(1-left/500));
         }
       }
+      updateTargetLabels();
       updateDashPreview();
       updateSkillVisuals(now);
       updateSkillHud();
@@ -884,6 +918,14 @@
     });
     window.addEventListener("blur",()=>{keys.clear();firing=false;cancelDashTarget();});
     window.addEventListener("pointerup",()=>{firing=false;});
+    window.addEventListener("pointermove",(e)=>{
+      if(e.pointerType==="touch")return;
+      const reticle=$("reticle");
+      if(!reticle)return;
+      reticle.style.left=e.clientX+"px";
+      reticle.style.top=e.clientY+"px";
+      reticle.style.display="block";
+    });
     canvas.addEventListener("pointermove",(e)=>view.pointerAim(e.clientX,e.clientY));
     canvas.addEventListener("pointerdown",(e)=>{
       if(e.button!==0)return;
