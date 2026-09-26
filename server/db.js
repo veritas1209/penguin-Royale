@@ -95,6 +95,18 @@ export class GameDatabase {
         settled_at INTEGER NOT NULL,
         PRIMARY KEY(raid_id, user_id)
       ) STRICT;
+      CREATE TABLE IF NOT EXISTS party_rooms (
+        id TEXT PRIMARY KEY,
+        code TEXT NOT NULL UNIQUE,
+        leader_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE
+      ) STRICT;
+      CREATE TABLE IF NOT EXISTS party_members (
+        room_id TEXT NOT NULL REFERENCES party_rooms(id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        position INTEGER NOT NULL,
+        PRIMARY KEY(room_id, user_id),
+        UNIQUE(user_id)
+      ) STRICT;
     `);
     const settlementColumns=new Set(this.db.prepare('PRAGMA table_info(raid_settlements)').all().map(row=>row.name));
     if(!settlementColumns.has('result_json'))this.db.exec("ALTER TABLE raid_settlements ADD COLUMN result_json TEXT NOT NULL DEFAULT '{}'");
@@ -181,6 +193,26 @@ export class GameDatabase {
       this.db.exec('ROLLBACK');
       throw error;
     }
+  }
+
+  loadParties() {
+    const rooms = this.db.prepare('SELECT id,code,leader_id FROM party_rooms').all();
+    const members = this.db.prepare('SELECT pm.room_id,u.id,u.username FROM party_members pm JOIN users u ON u.id=pm.user_id ORDER BY pm.position').all();
+    return rooms.map((room) => ({ ...room, members: members.filter((member) => member.room_id === room.id) }));
+  }
+
+  saveParty(room) {
+    this.transaction(() => {
+      this.db.prepare('INSERT INTO party_rooms(id,code,leader_id) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET leader_id=excluded.leader_id').run(room.id, room.code, room.leaderId);
+      this.db.prepare('DELETE FROM party_members WHERE room_id=?').run(room.id);
+      const insert = this.db.prepare('INSERT INTO party_members(room_id,user_id,position) VALUES(?,?,?)');
+      let position = 0;
+      for (const userId of room.members.keys()) insert.run(room.id, userId, position++);
+    });
+  }
+
+  deleteParty(roomId) {
+    this.db.prepare('DELETE FROM party_rooms WHERE id=?').run(roomId);
   }
 
   createUser(username, salt, passwordHash, starterItems = [], starterEquipped = {}, starterPacked = []) {

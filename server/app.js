@@ -259,6 +259,7 @@ async function route(request, response, context) {
     }else if(body.weaponSlot!==undefined)throw gameError('INVALID_WEAPON_SLOT','weaponSlot is only valid for firearm attachments');
     if(body.slot==='vest'){const index=body.armorSlot??0;if(!Number.isSafeInteger(index)||index<0||index>2)throw gameError('INVALID_SLOT','Unknown armor attachment slot');storedSlot=`armor:${index}`;}else if(body.armorSlot!==undefined)throw gameError('INVALID_SLOT','armorSlot is only valid for armor attachments');
     const profile=context.db.equip(user.id,storedSlot,body.itemId,context.catalog,body.instanceId??null,body.hostInstanceId??null);
+    context.manager.broadcastCurrentRoom(user.id);
     return send(response, 200, { ok: true, profile: profileView(profile) });
   }
 
