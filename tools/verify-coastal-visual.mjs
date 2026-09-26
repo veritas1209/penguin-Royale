@@ -13,6 +13,14 @@ import {paintCoastalMap} from '../shared/coastalMap.js';
 const marks=[];const ctx=new Proxy({}, {get:(_,key)=>key==='arc'?((...args)=>marks.push(args)):(()=>{}),set:()=>true});
 paintCoastalMap(ctx,WORLD,x=>x,z=>z,1);paintCoastalMap(ctx,WORLD,x=>x,z=>z,1,true);
 for(const tower of WORLD.obstacles.filter(o=>o.kind==='cooling-tower'))assert.ok(marks.some(([x,z])=>x===tower.x&&z===tower.z));
-for(const mesh of art.root.children.filter(o=>o.material?.uniforms)){assert.equal(mesh.material.uniforms.time.value,21);assert.ok(mesh.material.fragmentShader.includes('distance'));}
+for(const mesh of art.root.children.filter(o=>o.material?.uniforms)){
+ assert.equal(mesh.material.uniforms.time.value,21);
+ assert.ok(mesh.material.fragmentShader.includes('distance'));
+ const positions=mesh.geometry.attributes.position;
+ let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity;
+ for(let i=0;i<positions.count;i++){minX=Math.min(minX,positions.getX(i));maxX=Math.max(maxX,positions.getX(i));minZ=Math.min(minZ,positions.getZ(i));maxZ=Math.max(maxZ,positions.getZ(i));}
+ if(mesh.material.uniforms.sea.value){assert.ok(minX<=-300&&maxZ>=300);}
+ else{assert.ok(maxX>=300&&minZ<=-300);}
+}
 assert.equal(art.roofs.filter(({b})=>b.id.startsWith('hydro-')).length,6);
 art.dispose();

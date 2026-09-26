@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {WORLD} from '../../shared/world.ts';
+import {movementBlocked,advanceMovement} from '../../shared/movement.ts';
 const overlap=(a,b,g=0)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+g&&Math.abs(a.z-b.z)<(a.d+b.d)/2+g;
 test('coast and lake volumes fully block water without covering roads',()=>{
  const water=WORLD.terrain.filter(t=>/^(coast-sea-|nuclear-lake-)/.test(t.id));assert.equal(water.length,560);
@@ -27,4 +28,26 @@ test('curved water bodies taper naturally to the map boundary',()=>{
 test('nuclear site contains reserved reactor, switchyard and pumping infrastructure',()=>{
  const facilities=WORLD.obstacles.filter(o=>o.kind==='nuclear-equipment');assert.equal(facilities.length,3);
  for(const o of facilities){assert.ok(!WORLD.roads.some(r=>overlap(o,r,1)),o.id);assert.ok(!WORLD.buildings.some(b=>overlap(o,b,1)),o.id);assert.ok(!WORLD.obstacles.some(b=>b!==o&&b.kind==='tree'&&overlap(o,b,1)),o.id);}
+});
+
+test('shoreline and plant fences have collision along their visible rails',()=>{
+ const rails=WORLD.obstacles.filter(o=>o.id.startsWith('coastal-rail-'));
+ const plant=WORLD.obstacles.filter(o=>o.id.startsWith('nuclear-fence-'));
+ assert.equal(rails.length,188);
+ assert.equal(plant.length,3);
+ assert.ok(!WORLD.obstacles.some(o=>o.id==='road-end-gate-4-minus'));
+ for(const rail of [...rails,...plant]){
+  assert.equal(rail.kind,'shore-rail');
+  assert.ok(movementBlocked(WORLD,rail.x,rail.z),rail.id);
+  assert.ok(!WORLD.roads.some(road=>overlap(rail,road,.1)),rail.id);
+  assert.ok(!WORLD.buildings.some(building=>overlap(rail,building,.1)),rail.id);
+ }
+ for(const prefix of ['coastal-rail-sea-','coastal-rail-lake-']){
+  const side=prefix.includes('sea')?1:-1;
+  const rail=rails.filter(o=>o.id.startsWith(prefix))[30];
+  const state={x:rail.x+side*2,z:rail.z,stamina:100,maxStamina:100,moveMultiplier:1,coldUntil:0};
+  assert.equal(movementBlocked(WORLD,state.x,state.z),false);
+  for(let i=0;i<10;i++)advanceMovement(state,{moveX:-side,moveZ:0,sprint:false},.1,1000+i*100,WORLD);
+  assert.ok((state.x-rail.x)*side>.5,rail.id);
+ }
 });

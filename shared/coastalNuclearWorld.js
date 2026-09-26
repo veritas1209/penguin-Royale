@@ -2,6 +2,7 @@
 export function coastalNuclearWorld(world){
  const overlap=(a,b,g=0)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+g&&Math.abs(a.z-b.z)<(a.d+b.d)/2+g;
  world.terrain=world.terrain.filter(t=>!['fishing-ice','hydro-reservoir'].includes(t.id));
+ const shoreEdge=(sea,z)=>{const t=Math.max(0,Math.min(1,(z-(sea?100:-240))/140));return sea?-240+100*(1-Math.sqrt(1-t*t)):190+50*(1-Math.sqrt(1-t*t));};
  const waters=[];
  for(let z=100;z<240;z+=.5){const t=(z+.5-100)/140,right=-240+100*(1-Math.sqrt(Math.max(0,1-t*t)));waters.push({id:'coast-sea-'+z,kind:'reservoir',x:(-240+right)/2,z:z+.25,w:Math.max(.001,right+240),d:.5});}
  for(let z=-240;z<-100;z+=.5){const t=(z+240)/140,left=190+50*(1-Math.sqrt(Math.max(0,1-t*t)));waters.push({id:'nuclear-lake-'+z,kind:'reservoir',x:(left+240)/2,z:z+.25,w:Math.max(.001,240-left),d:.5});}
@@ -27,6 +28,25 @@ export function coastalNuclearWorld(world){
   for(const l of world.lootSpawns)if(Math.abs(l.x-ox)<o.w/2+1&&Math.abs(l.z-oz)<o.d/2+1){l.x+=o.x-ox;l.z+=o.z-oz;}
  }
  world.obstacles=world.obstacles.filter(o=>!['tree','rock'].includes(o.kind)||![...waters,...reserved,...world.obstacles.filter(district)].some(b=>b!==o&&overlap(o,b,3)));
+ // Rail hitboxes follow the same half-metre shoreline curve as the visible beams.
+ const shoreRails=[];
+ for(const sea of [true,false]){
+  const start=sea?100:-240,end=sea?240:-100,offset=sea?8:-3.5;
+  for(let z=start;z<end;){
+   const step=Math.min(end-z,end-z<=16?.5:2);
+   const x0=shoreEdge(sea,z)+offset,x1=shoreEdge(sea,z+step)+offset;
+   shoreRails.push({id:`coastal-rail-${sea?'sea':'lake'}-${z}`,kind:'shore-rail',x:(x0+x1)/2,z:z+step/2,w:Math.abs(x1-x0)+.22,d:step+.12,h:1.35,rotation:0,x0,x1,z0:z,z1:z+step});
+   z+=step;
+  }
+ }
+ // Keep the plant fence on land and stop it at the road edge; the central gap is its entrance.
+ const plantRails=[
+  {id:'nuclear-fence-north-west',from:133.5,to:146,z:-187},
+  {id:'nuclear-fence-north-east',from:160,to:175.8,z:-187},
+  {id:'nuclear-fence-south',from:123,to:183,z:-234}
+ ].map(({id,from,to,z})=>({id,kind:'shore-rail',x:(from+to)/2,z,w:to-from,d:.3,h:2.1,rotation:0}));
+ world.obstacles=world.obstacles.filter(o=>o.id!=='road-end-gate-4-minus'&&(!['tree','rock'].includes(o.kind)||![...shoreRails,...plantRails].some(r=>overlap(o,r,1))));
+ world.obstacles.push(...shoreRails,...plantRails);
  // Solid water volumes prevent entry even through teleports or the end of a quay.
  for(const t of waters)world.obstacles.push({...t,id:'water-block-'+t.id,kind:'water-blocker',h:1,rotation:0});
  for(const tower of reserved){if([...world.obstacles,...world.roads,...waters].some(o=>overlap(tower,o,2)))throw Error('Cooling tower collision '+tower.id);world.obstacles.push(tower);}

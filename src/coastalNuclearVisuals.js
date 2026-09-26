@@ -7,11 +7,11 @@ const _h=(g,c,x,y,z,r,h)=>put(g,c,x,y,z,new CylinderGeometry(r,r,h,20));
 const mg=group=>group;
 // Bundle-native Three.js district art; aliases supplied by the shipped renderer.
 export function __bcCoastalVisuals129(world){
- const root=new H,solid=new H,steam=[],materials=[],roofs=[];const temp=new Zc(1,1),Attribute=temp.attributes.position.constructor;temp.dispose();root.name='coastal-nuclear-districts-129';
+ const root=new H,solid=new H,steam=[],materials=[],roofs=[];const temp=new Zc(1,1),Attribute=temp.attributes.position.constructor;temp.dispose();root.name='coastal-nuclear-districts-129';const outer=(world.size??480)/2+70;
  const edge=(sea,z)=>{const t=Math.max(0,Math.min(1,(z-(sea?100:-240))/140));return sea?-240+100*(1-Math.sqrt(1-t*t)):190+50*(1-Math.sqrt(1-t*t));};
- const ribbon=(sea,near,far,y,color)=>{const v=[];for(let z=sea?100:-240;z<(sea?240:-100);z+=.5){const s=sea?1:-1,a=edge(sea,z),b=edge(sea,z+.5);v.push(a+s*near,y,z,b+s*near,y,z+.5,b+s*far,y,z+.5,a+s*near,y,z,b+s*far,y,z+.5,a+s*far,y,z);}const geo=new oo;geo.setAttribute('position',new Attribute(v,3));geo.computeVertexNormals();const mat=new fl({color,roughness:1,side:2});root.add(new U(geo,mat));materials.push(mat);};
+ const ribbon=(sea,near,far,y,color)=>{const v=[];for(let z=sea?100:-outer;z<(sea?outer:-100);z+=.5){const s=sea?1:-1,a=edge(sea,z),b=edge(sea,z+.5);v.push(a+s*near,y,z,b+s*near,y,z+.5,b+s*far,y,z+.5,a+s*near,y,z,b+s*far,y,z+.5,a+s*far,y,z);}const geo=new oo;geo.setAttribute('position',new Attribute(v,3));geo.computeVertexNormals();const mat=new fl({color,roughness:1,side:2});root.add(new U(geo,mat));materials.push(mat);};
  for(const sea of [true,false]){
-  const vertices=[];for(let z=sea?100:-240;z<(sea?240:-100);z+=.5){const a=edge(sea,z),b=edge(sea,z+.5),outer=sea?-240:240;vertices.push(outer,.12,z,a,.12,z,b,.12,z+.5,outer,.12,z,b,.12,z+.5,outer,.12,z+.5);}
+  const vertices=[];for(let z=sea?100:-outer;z<(sea?outer:-100);z+=.5){const a=edge(sea,z),b=edge(sea,z+.5),far=sea?-outer:outer;vertices.push(far,.12,z,a,.12,z,b,.12,z+.5,far,.12,z,b,.12,z+.5,far,.12,z+.5);}
   const geo=new oo;geo.setAttribute('position',new Attribute(vertices,3));geo.computeVertexNormals();
   const material=new ul({side:2,uniforms:{time:{value:0},sea:{value:sea?1:0}},vertexShader:`varying vec3 wp;void main(){wp=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform float time;uniform float sea;varying vec3 wp;
 float noise(vec2 p){return sin(p.x*.43+sin(p.y*.27))*cos(p.y*.36+sin(p.x*.21));}
@@ -21,9 +21,12 @@ float phase=distance*.92+sin(p.y*.23+time*.2)*.45+sin(p.y*.67)*.15+time*.95;floa
 #include <colorspace_fragment>
 }`});root.add(new U(geo,material));materials.push(material);
   ribbon(sea,0,sea?2:1,.115,sea?'#aaa083':'#8e9b82');ribbon(sea,sea?2:1,sea?7:2.8,.10,sea?'#c1b38b':'#a0ac91');
-  // Tangent-aligned railing panels follow one continuous arc; no rectangular quay teeth.
-  for(let z=sea?106:-238;z<(sea?237:-104);z+=3){const x=edge(sea,z)+(sea?8:-3.5),next=edge(sea,Math.min(z+3,sea?240:-100))+(sea?8:-3.5),dx=next-x,span=Math.hypot(dx,3);if(sea&&z>210)continue;for(const y of [.62,1.1]){const beam=q(solid,sea?'#817253':'#758981',(x+next)/2,y,z+1.5,.09,.10,span+.04);beam.rotation.y=Math.atan2(dx,3);}q(solid,sea?'#5d5e48':'#52675f',x,.68,z,.14,1.36,.14);}
-  if(sea)for(let i=0;i<24;i++){const z=116+i*4.8,x=edge(true,z)-2.5-(i%4)*1.25;const rock=gh(solid,i%2?'#667a72':'#7f8a79',x,.17,z,.8+(i%3)*.35,.45+(i%4)*.17,.7+(i%2)*.45);rock.rotation.y=i*1.7;}
+  // The visible rails use the same endpoints as server collision, then disappear beyond the map edge.
+  const railPiece=(x0,z0,x1,z1)=>{const dx=x1-x0,dz=z1-z0,span=Math.hypot(dx,dz);for(const y of [.62,1.1]){const beam=q(solid,sea?'#817253':'#758981',(x0+x1)/2,y,(z0+z1)/2,.09,.10,span+.06);beam.rotation.y=Math.atan2(dx,dz);}q(solid,sea?'#5d5e48':'#52675f',x0,.68,z0,.14,1.36,.14);};
+  for(const rail of world.obstacles.filter(o=>o.id?.startsWith(sea?'coastal-rail-sea-':'coastal-rail-lake-')))railPiece(rail.x0,rail.z0,rail.x1,rail.z1);
+  const farX=edge(sea,sea?240:-240)+(sea?8:-3.5);
+  for(let z=sea?240:-outer;z<(sea?outer:-240);z+=3)railPiece(farX,z,farX,Math.min(z+3,sea?outer:-240));
+  if(sea)for(let i=0;i<24;i++){const z=116+i*4.8,x=edge(true,z)-5-(i%4)*1.25;const rock=gh(solid,i%2?'#667a72':'#7f8a79',x,.17,z,.5+(i%3)*.22,.3+(i%4)*.12,.45+(i%2)*.25);rock.rotation.y=i*1.7;}
  }
  // Open-topped hyperboloid concrete shells with fluted sides and ring foundations.
  for(const o of world.obstacles.filter(o=>o.kind==='cooling-tower')){
@@ -38,7 +41,8 @@ float phase=distance*.92+sin(p.y*.23+time*.2)*.45+sin(p.y*.67)*.15+time*.95;floa
  // Industrial hardstand, overhead circulation pipes and security perimeter.
  q(solid,'#89968a',153,.065,-213,62,.08,49);
  for(const x of [139,142]){const pipe=_h(solid,'#6b8580',x,1.3,-208,.23,9);pipe.rotation.x=Math.PI/2;}
- for(const z of [-234,-187]){for(let x=123;x<183;x+=3){if(z===-187&&x>146&&x<160)continue;q(solid,'#64796d',x,1.05,z,.10,2.1,.10);for(const y of [.7,1.8])q(solid,'#95a79b',x+1.5,y,z,3,.045,.045);for(let k=0;k<6;k++)q(solid,'#829489',x+k*.5,1.15,z,.025,1.5,.025);}}
+ for(const fence of world.obstacles.filter(o=>o.id?.startsWith('nuclear-fence-'))){const left=fence.x-fence.w/2,right=fence.x+fence.w/2,z=fence.z;for(let x=left;x<right;x+=3){const span=Math.min(3,right-x);q(solid,'#64796d',x,1.05,z,.10,2.1,.10);for(const y of [.7,1.8])q(solid,'#95a79b',x+span/2,y,z,span,.045,.045);for(let k=0;k<Math.ceil(span/.5);k++)q(solid,'#829489',x+k*.5,1.15,z,.025,1.5,.025);}q(solid,'#64796d',right,1.05,z,.10,2.1,.10);}
+
  for(const b of (world.buildings??[]).filter(b=>b.id.startsWith('hydro-'))){q(solid,'#8d988a',b.x,.05,b.z,b.w+2,.08,b.d+2);for(let i=0;i<4;i++)q(solid,'#c8b66e',b.x-b.w*.3+i*.7,.105,b.z+b.d/2+.5,.35,.015,.5);}
  // Containment dome, switchyard and water treatment building occupy server-reserved footprints.
  for(const o of world.obstacles.filter(o=>o.kind==='nuclear-equipment')){
