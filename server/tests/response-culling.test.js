@@ -55,3 +55,14 @@ test('dynamic entity visibility uses a sprint-safe hysteresis band',()=>{
  enemy.x=60;
  assert.equal(raid.snapshot(1400,player.id).enemies.length,1);
 });
+
+test('all squad members remain in every snapshot across the map',()=>{
+ const world=smallWorld(),room={mode:'coop',members:new Map([['p',{username:'p'}],['q',{username:'q'}]])};
+ const raid=new Raid({id:'squad-visibility-test',room,escrow:[{userId:'p',gear:[]},{userId:'q',gear:[]}],db,catalog,world,now:()=>1000,emit(){}});
+ const first=raid.players.get('p'),second=raid.players.get('q');
+ first.x=-110;first.z=-110;second.x=110;second.z=110;second.hp=42;
+ const view=raid.snapshot(1000,'p');
+ assert.equal(view.players.length,2);
+ assert.equal(view.players.find(player=>player.id==='q').hp,42);
+ assert.equal(view.players.find(player=>player.id==='q').x,110);
+});

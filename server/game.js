@@ -2923,7 +2923,7 @@ const result=this.db.settleRaidPlayer(this.id,player.id,outcome,returnedGear,out
   snapshot(now = this.now(), viewerId = null, snapshotId = ++this.snapshotId) {
     const viewer=this.players.get(viewerId);
     const visible=(kind,entity,entry=SNAPSHOT_ENTITY_ENTRY_RADIUS,exit=SNAPSHOT_ENTITY_EXIT_RADIUS)=>!viewer||visibleWithHysteresis(this.viewerVisibility,viewerId,kind,entity,distance(entity,viewer),entry,exit);
-    const visiblePlayers=[...this.players.values()].filter(player=>!viewer||player.id===viewerId||visible('player',player));
+    const visiblePlayers=[...this.players.values()]; // Squad positions and health must remain visible across the full map.
     return {
       v: 1, type: 'snapshot', id: snapshotId, serverTime: now,
       raid: { id: this.id, phase: this.complete ? 'complete' : 'active', elapsedMs: now - this.startedAt },

@@ -786,3 +786,5 @@ article:has(> svg.bc-legendary-photo){
 .inv-item-grid .inv-item-tile.bc-legendary-bag-81:has(.bc-legendary-arbiter){--bc-legend-halo:rgba(83,217,255,.18)}
 
 .room-waiting{padding:12px 10px;color:#f2e8c8;text-align:center;font-weight:700;background:#31525388;border:1px solid #8ea79a55}.room-panel button:disabled{opacity:.55;cursor:default}
+
+.raid-team .team-member{position:relative;padding-bottom:13px}.raid-team .team-member .team-health{position:absolute;left:12px;right:12px;bottom:5px;height:4px;background:#172e2a;overflow:hidden}.raid-team .team-member .team-health small{display:block;height:100%;background:#72dbd4}.raid-team .team-member:has(i.downed) .team-health small{background:#eaa182}

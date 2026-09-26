@@ -7,11 +7,13 @@ const _h=(g,c,x,y,z,r,h)=>put(g,c,x,y,z,new CylinderGeometry(r,r,h,20));
 const mg=group=>group;
 // Bundle-native Three.js district art; aliases supplied by the shipped renderer.
 export function __bcCoastalVisuals129(world){
- const root=new H,solid=new H,steam=[],materials=[],roofs=[];const temp=new Zc(1,1),Attribute=temp.attributes.position.constructor;temp.dispose();root.name='coastal-nuclear-districts-129';const outer=(world.size??480)/2+70;
+ const root=new H,solid=new H,steam=[],materials=[],roofs=[];const temp=new Zc(1,1),Attribute=temp.attributes.position.constructor;temp.dispose();root.name='coastal-nuclear-districts-129';const outer=(world.size??480)/2+220;
  const edge=(sea,z)=>{const t=Math.max(0,Math.min(1,(z-(sea?100:-240))/140));return sea?-240+100*(1-Math.sqrt(1-t*t)):190+50*(1-Math.sqrt(1-t*t));};
- const ribbon=(sea,near,far,y,color)=>{const v=[];for(let z=sea?100:-outer;z<(sea?outer:-100);z+=.5){const s=sea?1:-1,a=edge(sea,z),b=edge(sea,z+.5);v.push(a+s*near,y,z,b+s*near,y,z+.5,b+s*far,y,z+.5,a+s*near,y,z,b+s*far,y,z+.5,a+s*far,y,z);}const geo=new oo;geo.setAttribute('position',new Attribute(v,3));geo.computeVertexNormals();const mat=new fl({color,roughness:1,side:2});root.add(new U(geo,mat));materials.push(mat);};
+ const shoreFade=(sea,z)=>{const t=Math.max(0,Math.min(1,sea?(z+20)/120:(20-z)/120));return t*t*(3-2*t);};
+ const farEdge=(sea,z)=>{const e=edge(sea,z),fade=shoreFade(sea,z);return e+(sea?-1:1)*(outer-Math.abs(e))*fade;};
+ const ribbon=(sea,near,far,y,color)=>{const v=[];for(let z=sea?-20:-outer;z<(sea?outer:20);z+=.5){const side=sea?1:-1,a=edge(sea,z),b=edge(sea,z+.5),fa=shoreFade(sea,z),fb=shoreFade(sea,z+.5);v.push(a+side*near*fa,y,z,b+side*near*fb,y,z+.5,b+side*far*fb,y,z+.5,a+side*near*fa,y,z,b+side*far*fb,y,z+.5,a+side*far*fa,y,z);}const geo=new oo;geo.setAttribute('position',new Attribute(v,3));geo.computeVertexNormals();const mat=new fl({color,roughness:1,side:2});root.add(new U(geo,mat));materials.push(mat);};
  for(const sea of [true,false]){
-  const vertices=[];for(let z=sea?100:-outer;z<(sea?outer:-100);z+=.5){const a=edge(sea,z),b=edge(sea,z+.5),far=sea?-outer:outer;vertices.push(far,.12,z,a,.12,z,b,.12,z+.5,far,.12,z,b,.12,z+.5,far,.12,z+.5);}
+  const vertices=[];for(let z=sea?-20:-outer;z<(sea?outer:20);z+=.5){const a=edge(sea,z),b=edge(sea,z+.5),farA=farEdge(sea,z),farB=farEdge(sea,z+.5);vertices.push(farA,.12,z,a,.12,z,b,.12,z+.5,farA,.12,z,b,.12,z+.5,farB,.12,z+.5);}
   const geo=new oo;geo.setAttribute('position',new Attribute(vertices,3));geo.computeVertexNormals();
   const material=new ul({side:2,uniforms:{time:{value:0},sea:{value:sea?1:0}},vertexShader:`varying vec3 wp;void main(){wp=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform float time;uniform float sea;varying vec3 wp;
 float noise(vec2 p){return sin(p.x*.43+sin(p.y*.27))*cos(p.y*.36+sin(p.x*.21));}
